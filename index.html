@@ -197,6 +197,25 @@
       margin-bottom: 12px;
       line-height: 1.5;
     }
+
+    select { width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; font-size:16px; background:white; color:#222; }
+    .grade-resumo { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:16px 0; }
+    .indicador { padding:14px; border-radius:10px; background:#f1f5f9; }
+    .indicador small { display:block; color:#475569; font-size:12px; margin-bottom:6px; }
+    .indicador strong { display:block; font-size:23px; }
+    .indicador.vermelho { background:#fee2e2; color:#991b1b; }
+    .indicador.amarelo { background:#fef3c7; color:#92400e; }
+    .indicador.verde { background:#dcfce7; color:#166534; }
+    .tabela-container { width:100%; overflow-x:auto; margin-top:14px; }
+    .tabela-relatorio { width:100%; border-collapse:collapse; font-size:13px; }
+    .tabela-relatorio th,.tabela-relatorio td { padding:11px 8px; text-align:left; border-bottom:1px solid #e2e8f0; vertical-align:top; }
+    .tabela-relatorio th { background:#f8fafc; white-space:nowrap; }
+    .tabela-relatorio td small { display:block; margin-top:4px; color:#64748b; }
+    .situacao { display:inline-block; padding:4px 7px; border-radius:6px; font-size:12px; white-space:nowrap; }
+    .situacao.correto { background:#dcfce7; color:#166534; }
+    .situacao.faltante { background:#fee2e2; color:#991b1b; }
+    .situacao.excedente,.situacao.nao_cadastrado { background:#fef3c7; color:#92400e; }
+    .metadados-relatorio { white-space:pre-line; line-height:1.6; color:#475569; font-size:14px; overflow-wrap:anywhere; }
   </style>
 </head>
 
@@ -256,6 +275,8 @@
         <button id="botao-ir-contagem" type="button">
           Iniciar / continuar contagem
         </button>
+
+        <button id="botao-ir-relatorios" type="button">Relatórios de contagem</button>
       </div>
     </section>
 
@@ -452,6 +473,58 @@
         </div>
       </div>
     </section>
+
+    <!-- RELATÓRIOS -->
+    <section id="tela-relatorios" class="hidden">
+      <div class="topo">
+        <strong>Relatórios de contagem</strong>
+        <button id="botao-voltar-relatorios" type="button" class="secondary">Voltar</button>
+      </div>
+      <div class="card">
+        <h2>Contagens finalizadas</h2>
+        <label for="relatorio-contagem">Selecione a contagem</label>
+        <select id="relatorio-contagem"><option value="">Selecione uma contagem</option></select>
+        <button id="botao-atualizar-relatorios" type="button" class="secondary">Atualizar histórico</button>
+        <div id="mensagem-relatorios" role="status" aria-live="polite"></div>
+      </div>
+      <div id="painel-relatorio" class="hidden">
+        <div class="card">
+          <h2 id="relatorio-titulo">Resumo da contagem</h2>
+          <p id="relatorio-metadados" class="metadados-relatorio"></p>
+          <div class="grade-resumo">
+            <div class="indicador"><small>Unidades previstas</small><strong id="relatorio-previsto">0</strong></div>
+            <div class="indicador"><small>Unidades contadas — cadastrados</small><strong id="relatorio-contado">0</strong></div>
+            <div class="indicador vermelho"><small>Unidades faltantes</small><strong id="relatorio-faltantes">0</strong></div>
+            <div class="indicador amarelo"><small>Unidades excedentes</small><strong id="relatorio-excedentes">0</strong></div>
+            <div class="indicador verde"><small>Produtos com quantidade correta</small><strong id="relatorio-corretos">0</strong></div>
+            <div class="indicador amarelo"><small>Unidades com código não cadastrado</small><strong id="relatorio-desconhecidos">0</strong></div>
+          </div>
+          <p class="ajuda">Os indicadores representam a contagem inteira, independentemente dos filtros. Códigos não cadastrados são apresentados separadamente e não entram nas divergências dos produtos cadastrados.</p>
+          <p class="ajuda">Neste modelo, as quantidades previstas são registradas no fechamento. Descrição, código e localização são consultados no cadastro atual. Cadastrar um código depois não resolve automaticamente uma pendência histórica.</p>
+        </div>
+        <div class="card">
+          <h2>Itens do relatório</h2>
+          <label for="relatorio-filtro">Situação</label>
+          <select id="relatorio-filtro">
+            <option value="todos">Todas as situações</option>
+            <option value="faltante">Faltantes</option>
+            <option value="excedente">Excedentes</option>
+            <option value="correto">Corretos</option>
+            <option value="nao_cadastrado">Códigos não cadastrados</option>
+          </select>
+          <label for="relatorio-busca">Buscar</label>
+          <input id="relatorio-busca" type="search" placeholder="Código, descrição ou localização" />
+          <button id="botao-exportar-relatorio" type="button" class="success" disabled>Exportar CSV dos itens filtrados</button>
+          <p id="relatorio-total-exibido" class="ajuda"></p>
+          <div class="tabela-container">
+            <table class="tabela-relatorio">
+              <thead><tr><th>Produto / código</th><th>Previsto</th><th>Contado</th><th>Diferença</th><th>Situação</th></tr></thead>
+              <tbody id="relatorio-corpo"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script>
@@ -486,7 +559,8 @@
         login: el("tela-login"),
         menu: el("tela-menu"),
         cadastro: el("tela-cadastro"),
-        contagem: el("tela-contagem")
+        contagem: el("tela-contagem"),
+        relatorios: el("tela-relatorios")
       };
 
       function mostrarTela(nome) {
@@ -1512,6 +1586,7 @@
           if (error) throw error;
 
           const nome = contagemAtual.nome;
+          const contagemFinalizadaId = contagemAtual.id;
 
           contagemAtual = null;
           el("form-contagem").reset();
@@ -1522,6 +1597,9 @@
             "Os resultados foram gerados no banco.",
             "sucesso"
           );
+
+          mostrarTela("relatorios");
+          await carregarHistoricoRelatorios(contagemFinalizadaId);
         } catch (erro) {
           registrarErro(
             mensagem,
@@ -1594,6 +1672,9 @@
             usuarioAtual = sessao?.user || null;
 
             if (usuarioAtual) {
+              if (usuarioAnterior && usuarioAnterior !== usuarioAtual.id) {
+                invalidarRelatorios();
+              }
               el("usuario-logado").textContent =
                 usuarioAtual.email || "";
 
@@ -1605,6 +1686,7 @@
                 mostrarTela("menu");
               }
             } else if (evento === "SIGNED_OUT") {
+              invalidarRelatorios();
               contagemAtual = null;
               atualizarPainelContagem();
               mostrarTela("login");
@@ -1650,6 +1732,347 @@
           atualizarPainelContagem();
         }
       }
+
+
+      // RELATÓRIOS: consultas somente de leitura.
+      let historicoRelatorios = [];
+      let itensRelatorio = [];
+      let contagemRelatorio = null;
+      let carregandoHistorico = false;
+      let carregandoRelatorio = false;
+      let versaoRelatorios = 0;
+
+      const rotulosSituacao = {
+        correto: "Correto", faltante: "Faltante",
+        excedente: "Excedente", nao_cadastrado: "Não cadastrado"
+      };
+
+      function formatarDataRelatorio(valor) {
+        if (!valor) return "Não informado";
+        const data = new Date(valor);
+        return Number.isNaN(data.getTime())
+          ? "Data inválida" : data.toLocaleString("pt-BR");
+      }
+
+      function normalizarBuscaRelatorio(valor) {
+        return String(valor || "").normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      }
+
+      function obterItensFiltradosRelatorio() {
+        const filtro = el("relatorio-filtro").value;
+        const busca = normalizarBuscaRelatorio(el("relatorio-busca").value.trim());
+        return itensRelatorio.filter((item) => {
+          if (filtro !== "todos" && item.situacao !== filtro) return false;
+          return !busca || normalizarBuscaRelatorio(
+            `${item.codigo} ${item.descricao} ${item.localizacao}`
+          ).includes(busca);
+        });
+      }
+
+      function atualizarControlesRelatorios() {
+        const ocupado = carregandoHistorico || carregandoRelatorio;
+        el("relatorio-contagem").disabled = ocupado;
+        el("botao-atualizar-relatorios").disabled = ocupado;
+        el("botao-exportar-relatorio").disabled = ocupado ||
+          !contagemRelatorio || !obterItensFiltradosRelatorio().length;
+      }
+
+      function limparRelatorioAtual() {
+        contagemRelatorio = null;
+        itensRelatorio = [];
+        el("painel-relatorio").classList.add("hidden");
+        el("relatorio-corpo").replaceChildren();
+        atualizarControlesRelatorios();
+      }
+
+      function invalidarRelatorios() {
+        versaoRelatorios += 1;
+        carregandoHistorico = false;
+        carregandoRelatorio = false;
+        historicoRelatorios = [];
+        el("relatorio-contagem").replaceChildren();
+        limparMensagem(el("mensagem-relatorios"));
+        limparRelatorioAtual();
+      }
+
+      async function buscarTodasPaginasRelatorio(criarConsulta, validar = () => true) {
+        const registros = [];
+        let inicio = 0;
+        const tamanho = 500;
+        while (true) {
+          if (!validar()) throw new Error("Consulta cancelada por troca de sessão ou seleção.");
+          const { data, error } = await criarConsulta().range(inicio, inicio + tamanho - 1);
+          if (error) throw error;
+          if (!validar()) throw new Error("Consulta cancelada por troca de sessão ou seleção.");
+          if (!data?.length) break;
+          registros.push(...data);
+          inicio += data.length;
+        }
+        return registros;
+      }
+
+      async function carregarHistoricoRelatorios(idSelecionar = null) {
+        if (carregandoHistorico || carregandoRelatorio) return;
+        const versao = ++versaoRelatorios;
+        const usuarioId = usuarioAtual?.id;
+        const valido = () => versao === versaoRelatorios &&
+          Boolean(usuarioId) && usuarioAtual?.id === usuarioId;
+        const mensagem = el("mensagem-relatorios");
+        carregandoHistorico = true;
+        limparRelatorioAtual();
+        atualizarControlesRelatorios();
+        exibirMensagem(mensagem, "Carregando contagens finalizadas...", "info");
+        let selecionada = false;
+        try {
+          if (!usuarioId) throw new Error("Entre novamente para consultar os relatórios.");
+          const dados = await buscarTodasPaginasRelatorio(() => exigirConexao()
+            .from("contagens")
+            .select("id,nome,data_inicio,data_fechamento,status")
+            .eq("status", "finalizada")
+            .order("data_fechamento", { ascending: false })
+            .order("id", { ascending: true }), valido);
+          if (!valido()) return;
+          historicoRelatorios = dados;
+          const seletor = el("relatorio-contagem");
+          seletor.replaceChildren();
+          const inicial = document.createElement("option");
+          inicial.value = "";
+          inicial.textContent = dados.length ? "Selecione uma contagem" : "Nenhuma contagem finalizada";
+          seletor.append(inicial);
+          for (const item of dados) {
+            const opcao = document.createElement("option");
+            opcao.value = item.id;
+            opcao.textContent = `${item.nome} — ${formatarDataRelatorio(item.data_fechamento)}`;
+            seletor.append(opcao);
+          }
+          if (!dados.length) {
+            exibirMensagem(mensagem, "Nenhuma contagem finalizada disponível para este usuário.", "aviso");
+          } else limparMensagem(mensagem);
+          if (idSelecionar && dados.some((item) => item.id === idSelecionar)) {
+            seletor.value = idSelecionar;
+            selecionada = true;
+          }
+        } catch (erro) {
+          if (!valido()) return;
+          historicoRelatorios = [];
+          el("relatorio-contagem").replaceChildren();
+          registrarErro(mensagem, "Erro ao carregar histórico", erro);
+        } finally {
+          if (versao === versaoRelatorios) {
+            carregandoHistorico = false;
+            atualizarControlesRelatorios();
+          }
+        }
+        if (selecionada && valido()) await carregarRelatorioSelecionado(idSelecionar);
+      }
+
+      async function carregarRelatorioSelecionado(contagemId) {
+        const versao = ++versaoRelatorios;
+        const usuarioId = usuarioAtual?.id;
+        const valido = () => versao === versaoRelatorios &&
+          Boolean(usuarioId) && usuarioAtual?.id === usuarioId;
+        const mensagem = el("mensagem-relatorios");
+        limparRelatorioAtual();
+        carregandoRelatorio = false;
+        if (!contagemId) {
+          limparMensagem(mensagem);
+          atualizarControlesRelatorios();
+          return;
+        }
+        const selecionada = historicoRelatorios.find((item) => item.id === contagemId);
+        if (!selecionada) {
+          exibirMensagem(mensagem, "Contagem não encontrada no histórico.", "erro");
+          return;
+        }
+        carregandoRelatorio = true;
+        atualizarControlesRelatorios();
+        exibirMensagem(mensagem, "Carregando resultados e pendências...", "info");
+        try {
+          const [resultados, pendencias] = await Promise.all([
+            buscarTodasPaginasRelatorio(() => exigirConexao()
+              .from("contagem_resultados")
+              .select(`id,produto_id,quantidade_sistema,quantidade_contada,diferenca,status,
+                produtos(codigo_barras,descricao,localizacao)`)
+              .eq("contagem_id", contagemId).order("id", { ascending: true }), valido),
+            buscarTodasPaginasRelatorio(() => exigirConexao()
+              .from("contagem_itens").select("id,codigo_lido,quantidade_contada")
+              .eq("contagem_id", contagemId).eq("codigo_conhecido", false)
+              .order("id", { ascending: true }), valido)
+          ]);
+          if (!valido()) return;
+          const conhecidos = resultados.map((item) => {
+            const produto = Array.isArray(item.produtos) ? item.produtos[0] : item.produtos;
+            return {
+              codigo: produto?.codigo_barras || "",
+              descricao: produto?.descricao || "Produto indisponível",
+              localizacao: produto?.localizacao || "",
+              previsto: Number(item.quantidade_sistema),
+              contado: Number(item.quantidade_contada),
+              diferenca: Number(item.diferenca), situacao: item.status
+            };
+          });
+          const agrupados = new Map();
+          for (const item of pendencias) {
+            if (!agrupados.has(item.codigo_lido)) agrupados.set(item.codigo_lido, {
+              codigo: item.codigo_lido, descricao: "Código não cadastrado na contagem",
+              localizacao: "", previsto: null, contado: 0,
+              diferenca: null, situacao: "nao_cadastrado"
+            });
+            agrupados.get(item.codigo_lido).contado += Number(item.quantidade_contada);
+          }
+          const ordem = { faltante: 0, excedente: 1, nao_cadastrado: 2, correto: 3 };
+          itensRelatorio = [...conhecidos, ...agrupados.values()].sort((a, b) =>
+            ((ordem[a.situacao] ?? 9) - (ordem[b.situacao] ?? 9)) ||
+            a.descricao.localeCompare(b.descricao, "pt-BR") || a.codigo.localeCompare(b.codigo));
+          contagemRelatorio = selecionada;
+          el("relatorio-filtro").value = "todos";
+          el("relatorio-busca").value = "";
+          atualizarResumoRelatorio();
+          renderizarItensRelatorio();
+          el("painel-relatorio").classList.remove("hidden");
+          if (!resultados.length) exibirMensagem(mensagem,
+            "Esta contagem não possui resultados de produtos cadastrados. Eventuais códigos desconhecidos aparecem abaixo.", "aviso");
+          else limparMensagem(mensagem);
+        } catch (erro) {
+          if (!valido()) return;
+          limparRelatorioAtual();
+          registrarErro(mensagem, "Erro ao carregar relatório", erro);
+        } finally {
+          if (versao === versaoRelatorios) {
+            carregandoRelatorio = false;
+            atualizarControlesRelatorios();
+          }
+        }
+      }
+
+      function atualizarResumoRelatorio() {
+        const totais = { previsto: 0, contado: 0, faltantes: 0, excedentes: 0, corretos: 0, desconhecidos: 0 };
+        for (const item of itensRelatorio) {
+          if (item.situacao === "nao_cadastrado") {
+            totais.desconhecidos += item.contado;
+            continue;
+          }
+          totais.previsto += item.previsto;
+          totais.contado += item.contado;
+          totais.faltantes += Math.max(0, -item.diferenca);
+          totais.excedentes += Math.max(0, item.diferenca);
+          if (item.situacao === "correto") totais.corretos++;
+        }
+        el("relatorio-titulo").textContent = contagemRelatorio.nome;
+        el("relatorio-metadados").textContent =
+          `Início: ${formatarDataRelatorio(contagemRelatorio.data_inicio)}\n` +
+          `Fechamento: ${formatarDataRelatorio(contagemRelatorio.data_fechamento)}\nID: ${contagemRelatorio.id}`;
+        for (const [chave, valor] of Object.entries(totais)) {
+          el(`relatorio-${chave}`).textContent = String(valor);
+        }
+      }
+
+      function renderizarItensRelatorio() {
+        const filtrados = obterItensFiltradosRelatorio();
+        const fragmento = document.createDocumentFragment();
+        let unidades = 0;
+        for (const item of filtrados) {
+          unidades += item.contado;
+          const linha = document.createElement("tr");
+          const produto = document.createElement("td");
+          const descricao = document.createElement("span");
+          descricao.textContent = item.descricao;
+          const codigo = document.createElement("small");
+          codigo.textContent = item.codigo || "Sem código disponível";
+          produto.append(descricao, codigo);
+          if (item.localizacao) {
+            const local = document.createElement("small");
+            local.textContent = item.localizacao;
+            produto.append(local);
+          }
+          linha.append(produto);
+          for (const valor of [item.previsto, item.contado,
+            item.diferenca === null ? null : item.diferenca > 0 ? `+${item.diferenca}` : item.diferenca]) {
+            const coluna = document.createElement("td");
+            coluna.textContent = valor === null ? "—" : String(valor);
+            linha.append(coluna);
+          }
+          const coluna = document.createElement("td");
+          const etiqueta = document.createElement("span");
+          etiqueta.className = `situacao ${item.situacao}`;
+          etiqueta.textContent = rotulosSituacao[item.situacao] || item.situacao;
+          coluna.append(etiqueta);
+          linha.append(coluna);
+          fragmento.append(linha);
+        }
+        if (!filtrados.length) {
+          const linha = document.createElement("tr");
+          const coluna = document.createElement("td");
+          coluna.colSpan = 5;
+          coluna.textContent = "Nenhum item encontrado para estes filtros.";
+          linha.append(coluna);
+          fragmento.append(linha);
+        }
+        el("relatorio-corpo").replaceChildren(fragmento);
+        el("relatorio-total-exibido").textContent =
+          `${filtrados.length} código(s) de ${itensRelatorio.length}. Unidades contadas nos itens exibidos: ${unidades}.`;
+        atualizarControlesRelatorios();
+      }
+
+      function campoCSVRelatorio(valor, forcarTexto = false) {
+        if (valor === null || valor === undefined) return '""';
+        if (typeof valor === "number" && Number.isFinite(valor)) return String(valor);
+        let texto = String(valor);
+        if (forcarTexto || /^[\s\u0000-\u001f]*[=+\-@]/u.test(texto) || /^[\t\r\n\u0000]/u.test(texto)) {
+          texto = "'" + texto;
+        }
+        return '"' + texto.replace(/"/g, '""') + '"';
+      }
+
+      function exportarCSVRelatorio() {
+        try {
+          if (!contagemRelatorio || carregandoRelatorio || carregandoHistorico) {
+            throw new Error("Selecione uma contagem e aguarde o carregamento.");
+          }
+          const itens = obterItensFiltradosRelatorio();
+          if (!itens.length) throw new Error("Não há itens para exportar com estes filtros.");
+          const cabecalho = ["Contagem", "ID da contagem", "Início", "Fechamento", "Código de barras",
+            "Descrição", "Localização", "Quantidade prevista", "Quantidade contada", "Diferença", "Situação"];
+          const linhas = [cabecalho.map((valor) => campoCSVRelatorio(valor)).join(";")];
+          for (const item of itens) {
+            const valores = [contagemRelatorio.nome, contagemRelatorio.id,
+              formatarDataRelatorio(contagemRelatorio.data_inicio),
+              formatarDataRelatorio(contagemRelatorio.data_fechamento), item.codigo,
+              item.descricao, item.localizacao, item.previsto, item.contado,
+              item.diferenca, rotulosSituacao[item.situacao] || item.situacao];
+            linhas.push(valores.map((valor, indice) => campoCSVRelatorio(valor, indice === 4)).join(";"));
+          }
+          const blob = new Blob(["\uFEFF" + linhas.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          const nome = contagemRelatorio.nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 70) || "contagem";
+          link.href = url;
+          link.download = `relatorio-${nome}-${el("relatorio-filtro").value}.csv`;
+          document.body.append(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } catch (erro) {
+          registrarErro(el("mensagem-relatorios"), "Erro ao exportar CSV", erro);
+        }
+      }
+
+      el("botao-ir-relatorios").addEventListener("click", async () => {
+        mostrarTela("relatorios");
+        await carregarHistoricoRelatorios();
+      });
+      el("botao-voltar-relatorios").addEventListener("click", () => mostrarTela("menu"));
+      el("botao-atualizar-relatorios").addEventListener("click", async () => {
+        await carregarHistoricoRelatorios(el("relatorio-contagem").value || null);
+      });
+      el("relatorio-contagem").addEventListener("change", async () => {
+        await carregarRelatorioSelecionado(el("relatorio-contagem").value);
+      });
+      el("relatorio-filtro").addEventListener("change", renderizarItensRelatorio);
+      el("relatorio-busca").addEventListener("input", renderizarItensRelatorio);
+      el("botao-exportar-relatorio").addEventListener("click", exportarCSVRelatorio);
 
       void inicializar();
     })();
