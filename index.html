@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Contagem de Estoque</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f4f6f8;
+      color: #222;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: bold;
+      margin: 12px 0 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      outline: 2px solid #dbeafe;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+    }
+
+    button.secondary {
+      background: #6b7280;
+    }
+
+    button.danger {
+      background: #dc2626;
+    }
+
+    button.success {
+      background: #15803d;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .mensagem {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+
+    .sucesso {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .erro {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .aviso {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .reader {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .reader video {
+      width: 100% !important;
+    }
+
+    .lista-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .lista-item span:first-child {
+      overflow-wrap: anywhere;
+    }
+
+    .contador {
+      font-weight: bold;
+      font-size: 18px;
+      color: #2563eb;
+      flex-shrink: 0;
+    }
+
+    .topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .topo strong {
+      overflow-wrap: anywhere;
+    }
+
+    .topo button {
+      width: auto;
+      padding: 8px 14px;
+      margin: 0;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .ajuda {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    .resumo {
+      background: #eff6ff;
+      color: #1e40af;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div id="mensagem-global" role="alert" aria-live="polite"></div>
+
+    <!-- LOGIN -->
+    <section id="tela-login" class="card">
+      <h1>Contagem de Estoque</h1>
+
+      <form id="form-login">
+        <label for="login-email">E-mail</label>
+        <input
+          id="login-email"
+          type="email"
+          placeholder="seu@email.com"
+          autocomplete="username"
+          required
+        />
+
+        <label for="login-senha">Senha</label>
+        <input
+          id="login-senha"
+          type="password"
+          placeholder="Sua senha"
+          autocomplete="current-password"
+          required
+        />
+
+        <button id="botao-login" type="submit">
+          Entrar
+        </button>
+      </form>
+
+      <div id="mensagem-login" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- MENU -->
+    <section id="tela-menu" class="hidden">
+      <div class="topo">
+        <strong id="usuario-logado"></strong>
+
+        <button id="botao-sair" type="button" class="secondary">
+          Sair
+        </button>
+      </div>
+
+      <div class="card">
+        <h1>Menu principal</h1>
+
+        <button id="botao-ir-cadastro" type="button">
+          Cadastrar produto
+        </button>
+
+        <button id="botao-ir-contagem" type="button">
+          Iniciar / continuar contagem
+        </button>
+      </div>
+    </section>
+
+    <!-- CADASTRO -->
+    <section id="tela-cadastro" class="hidden">
+      <div class="topo">
+        <strong>Cadastro de produto</strong>
+
+        <button
+          id="botao-voltar-cadastro"
+          type="button"
+          class="secondary"
+        >
+          Voltar
+        </button>
+      </div>
+
+      <div class="card">
+        <h2>Novo livro</h2>
+
+        <form id="form-produto">
+          <label for="cadastro-codigo">Código de barras</label>
+          <input
+            id="cadastro-codigo"
+            type="text"
+            placeholder="Leia ou digite o código"
+            autocomplete="off"
+            required
+          />
+
+          <button id="botao-escanear-cadastro" type="button">
+            Escanear código
+          </button>
+
+          <button
+            id="botao-parar-cadastro"
+            type="button"
+            class="secondary hidden"
+          >
+            Parar câmera
+          </button>
+
+          <div id="reader-cadastro" class="reader"></div>
+
+          <label for="cadastro-descricao">Descrição</label>
+          <input
+            id="cadastro-descricao"
+            type="text"
+            placeholder="Nome do livro"
+            required
+          />
+
+          <label for="cadastro-autor">Autor</label>
+          <input
+            id="cadastro-autor"
+            type="text"
+            placeholder="Autor"
+          />
+
+          <label for="cadastro-categoria">Categoria</label>
+          <input
+            id="cadastro-categoria"
+            type="text"
+            placeholder="Categoria"
+          />
+
+          <label for="cadastro-localizacao">Localização</label>
+          <input
+            id="cadastro-localizacao"
+            type="text"
+            placeholder="Estante / prateleira"
+          />
+
+          <label for="cadastro-quantidade">Quantidade inicial</label>
+          <input
+            id="cadastro-quantidade"
+            type="number"
+            min="0"
+            step="1"
+            value="1"
+            required
+          />
+
+          <button id="botao-salvar-produto" type="submit">
+            Salvar produto
+          </button>
+        </form>
+
+        <div id="mensagem-cadastro" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- CONTAGEM -->
+    <section id="tela-contagem" class="hidden">
+      <div class="topo">
+        <strong>Contagem</strong>
+
+        <button
+          id="botao-voltar-contagem"
+          type="button"
+          class="secondary"
+        >
+          Voltar
+        </button>
+      </div>
+
+      <div class="card">
+        <h2 id="titulo-contagem">Nova contagem</h2>
+
+        <form id="form-contagem">
+          <label for="contagem-nome">Nome da contagem</label>
+          <input
+            id="contagem-nome"
+            type="text"
+            placeholder="Contagem semanal"
+            required
+          />
+
+          <button id="botao-iniciar-contagem" type="submit">
+            Iniciar contagem
+          </button>
+        </form>
+
+        <div id="mensagem-contagem" role="status" aria-live="polite"></div>
+      </div>
+
+      <div id="painel-leitura" class="hidden">
+        <div class="card">
+          <h2>Leitura por código de barras</h2>
+
+          <p class="ajuda">
+            Cada leitura confirmada adiciona uma unidade.
+            Após a confirmação, posicione o próximo exemplar e
+            toque em “Ler próximo exemplar”.
+          </p>
+
+          <button id="botao-escanear-contagem" type="button">
+            Abrir câmera
+          </button>
+
+          <button
+            id="botao-proximo-exemplar"
+            type="button"
+            class="success hidden"
+          >
+            Ler próximo exemplar
+          </button>
+
+          <button
+            id="botao-parar-camera"
+            type="button"
+            class="secondary hidden"
+          >
+            Parar câmera
+          </button>
+
+          <div id="reader-contagem" class="reader"></div>
+
+          <form id="form-manual">
+            <label for="codigo-manual">Código manual</label>
+            <input
+              id="codigo-manual"
+              type="text"
+              placeholder="Digite o código, se necessário"
+              autocomplete="off"
+              required
+            />
+
+            <button
+              id="botao-registrar-manual"
+              type="submit"
+              class="secondary"
+            >
+              Registrar uma unidade
+            </button>
+          </form>
+
+          <div id="resultado-leitura" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="card">
+          <h2>Itens contados</h2>
+
+          <div id="resumo-contagem" class="resumo"></div>
+          <div id="lista-contagem"></div>
+
+          <button
+            id="botao-finalizar-contagem"
+            type="button"
+            class="danger"
+          >
+            Finalizar contagem
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const SUPABASE_URL =
+        "https://adhwuratwiogwftubtuv.supabase.co";
+
+      const SUPABASE_PUBLIC_KEY =
+        "sb_publishable_NmBbJifJZQ-gO0Mjn1u4WQ_MZyZnjRC";
+
+      const el = (id) => document.getElementById(id);
+
+      let db = null;
+      let usuarioAtual = null;
+      let contagemAtual = null;
+
+      let scanner = null;
+      let tipoScanner = null;
+      let abrindoCamera = false;
+      let parandoCamera = false;
+
+      let cadastroDetectado = false;
+      let leituraArmada = false;
+      let registrandoLeitura = false;
+      let finalizandoContagem = false;
+      let autenticando = false;
+      let audioContext = null;
+
+      const telas = {
+        login: el("tela-login"),
+        menu: el("tela-menu"),
+        cadastro: el("tela-cadastro"),
+        contagem: el("tela-contagem")
+      };
+
+      function mostrarTela(nome) {
+        Object.values(telas).forEach((tela) => {
+          tela.classList.add("hidden");
+        });
+
+        telas[nome].classList.remove("hidden");
+      }
+
+      function exibirMensagem(elemento, texto, tipo = "info") {
+        const caixa = document.createElement("div");
+        caixa.className = `mensagem ${tipo}`;
+        caixa.textContent = texto;
+
+        elemento.replaceChildren(caixa);
+      }
+
+      function limparMensagem(elemento) {
+        elemento.replaceChildren();
+      }
+
+      function detalheErro(erro) {
+        if (typeof erro === "string") return erro;
+
+        return erro?.message ||
+          erro?.error_description ||
+          "Ocorreu um erro inesperado.";
+      }
+
+      function registrarErro(elemento, contexto, erro) {
+        console.error(contexto, erro);
+
+        exibirMensagem(
+          elemento,
+          `${contexto}: ${detalheErro(erro)}`,
+          "erro"
+        );
+      }
+
+      function exigirConexao() {
+        if (!db) {
+          throw new Error(
+            "A conexão com o Supabase não foi inicializada. " +
+            "Verifique a configuração e recarregue a página."
+          );
+        }
+
+        return db;
+      }
+
+      async function obterUsuario() {
+        const { data, error } = await exigirConexao().auth.getUser();
+
+        if (error) throw error;
+
+        if (!data.user) {
+          throw new Error(
+            "Sua sessão não está disponível. Entre novamente."
+          );
+        }
+
+        return data.user;
+      }
+
+      function prepararAudio() {
+        try {
+          const AudioClass =
+            window.AudioContext || window.webkitAudioContext;
+
+          if (!AudioClass) return;
+
+          if (!audioContext) {
+            audioContext = new AudioClass();
+          }
+
+          if (audioContext.state === "suspended") {
+            audioContext.resume().catch(() => {});
+          }
+        } catch (erro) {
+          console.debug("Áudio indisponível.", erro);
+        }
+      }
+
+      function confirmarLeitura() {
+        try {
+          if (navigator.vibrate) navigator.vibrate(100);
+
+          if (!audioContext || audioContext.state !== "running") {
+            return;
+          }
+
+          const oscilador = audioContext.createOscillator();
+          const volume = audioContext.createGain();
+
+          oscilador.type = "sine";
+          oscilador.frequency.value = 880;
+          volume.gain.value = 0.06;
+
+          oscilador.connect(volume);
+          volume.connect(audioContext.destination);
+
+          oscilador.start();
+          oscilador.stop(audioContext.currentTime + 0.12);
+        } catch (erro) {
+          console.debug("Feedback indisponível.", erro);
+        }
+      }
+
+      function atualizarControles() {
+        const ocupada = abrindoCamera || parandoCamera;
+        const cameraCadastro = tipoScanner === "cadastro";
+        const cameraContagem = tipoScanner === "contagem";
+
+        el("botao-escanear-cadastro").disabled =
+          ocupada || Boolean(scanner);
+
+        el("botao-escanear-contagem").disabled =
+          ocupada ||
+          Boolean(scanner) ||
+          !contagemAtual ||
+          finalizandoContagem;
+
+        el("botao-parar-cadastro").classList.toggle(
+          "hidden",
+          !cameraCadastro
+        );
+
+        el("botao-parar-camera").classList.toggle(
+          "hidden",
+          !cameraContagem
+        );
+
+        el("botao-parar-cadastro").disabled = ocupada;
+        el("botao-parar-camera").disabled = ocupada;
+
+        el("botao-proximo-exemplar").classList.toggle(
+          "hidden",
+          !cameraContagem || leituraArmada
+        );
+
+        el("botao-proximo-exemplar").disabled =
+          ocupada ||
+          registrandoLeitura ||
+          finalizandoContagem;
+
+        el("botao-registrar-manual").disabled =
+          registrandoLeitura ||
+          finalizandoContagem ||
+          !contagemAtual;
+
+        el("botao-finalizar-contagem").disabled =
+          registrandoLeitura ||
+          finalizandoContagem ||
+          abrindoCamera ||
+          !contagemAtual;
+      }
+
+      function atualizarPainelContagem() {
+        const ativa = Boolean(contagemAtual);
+
+        el("painel-leitura").classList.toggle("hidden", !ativa);
+        el("contagem-nome").disabled = ativa;
+        el("botao-iniciar-contagem").disabled = ativa;
+
+        el("titulo-contagem").textContent =
+          ativa ? contagemAtual.nome : "Nova contagem";
+
+        if (ativa) {
+          el("contagem-nome").value = contagemAtual.nome;
+        }
+
+        atualizarControles();
+      }
+
+      async function pararCamera() {
+        if (abrindoCamera) {
+          throw new Error(
+            "Aguarde a câmera terminar de abrir antes de continuar."
+          );
+        }
+
+        if (parandoCamera) {
+          throw new Error("Aguarde a câmera parar.");
+        }
+
+        if (!scanner) return;
+
+        parandoCamera = true;
+        leituraArmada = false;
+        atualizarControles();
+
+        try {
+          if (scanner.isScanning) {
+            await scanner.stop();
+          }
+
+          scanner.clear();
+          scanner = null;
+          tipoScanner = null;
+        } finally {
+          parandoCamera = false;
+          atualizarControles();
+        }
+      }
+
+      function mensagemErroCamera(erro) {
+        const nome = erro?.name || "";
+        const texto = detalheErro(erro);
+
+        if (
+          nome === "NotAllowedError" ||
+          /permission|denied|notallowed/i.test(texto)
+        ) {
+          return "Permissão da câmera negada. Libere o acesso " +
+            "à câmera nas configurações do navegador.";
+        }
+
+        if (
+          nome === "NotFoundError" ||
+          /notfound|no camera/i.test(texto)
+        ) {
+          return "Nenhuma câmera foi encontrada neste dispositivo.";
+        }
+
+        return texto;
+      }
+
+      async function abrirCamera(tipo) {
+        const mensagem = tipo === "cadastro"
+          ? el("mensagem-cadastro")
+          : el("resultado-leitura");
+
+        try {
+          exigirConexao();
+
+          if (abrindoCamera || parandoCamera || scanner) {
+            throw new Error(
+              "Uma câmera já está aberta ou sendo inicializada."
+            );
+          }
+
+          if (!window.isSecureContext) {
+            throw new Error(
+              "Abra o sistema por HTTPS ou localhost para usar a câmera."
+            );
+          }
+
+          if (!navigator.mediaDevices?.getUserMedia) {
+            throw new Error(
+              "Este navegador não disponibilizou acesso à câmera."
+            );
+          }
+
+          if (typeof window.Html5Qrcode !== "function") {
+            throw new Error(
+              "A biblioteca de leitura não carregou. " +
+              "Verifique sua conexão e recarregue a página."
+            );
+          }
+
+          if (tipo === "contagem" && !contagemAtual) {
+            throw new Error("Inicie uma contagem primeiro.");
+          }
+
+          prepararAudio();
+
+          abrindoCamera = true;
+          tipoScanner = tipo;
+          cadastroDetectado = false;
+          leituraArmada = tipo === "contagem";
+
+          const destino = tipo === "cadastro"
+            ? "reader-cadastro"
+            : "reader-contagem";
+
+          scanner = new window.Html5Qrcode(destino);
+          atualizarControles();
+
+          exibirMensagem(mensagem, "Abrindo câmera...", "info");
+
+          await scanner.start(
+            { facingMode: "environment" },
+            {
+              fps: 10,
+              qrbox: (largura, altura) => ({
+                width: Math.floor(Math.min(300, largura * 0.85)),
+                height: Math.floor(Math.min(160, altura * 0.65))
+              })
+            },
+            (codigo) => {
+              if (abrindoCamera || parandoCamera) return;
+
+              if (tipo === "cadastro") {
+                if (cadastroDetectado) return;
+
+                cadastroDetectado = true;
+                void tratarCodigoCadastro(codigo);
+                return;
+              }
+
+              if (
+                !leituraArmada ||
+                registrandoLeitura ||
+                finalizandoContagem
+              ) {
+                return;
+              }
+
+              leituraArmada = false;
+              atualizarControles();
+              void registrarLeitura(codigo);
+            },
+            () => {}
+          );
+
+          exibirMensagem(
+            mensagem,
+            "Câmera aberta. Posicione o código dentro da área de leitura.",
+            "info"
+          );
+        } catch (erro) {
+          console.error("Erro na câmera:", erro);
+
+          if (scanner && !scanner.isScanning) {
+            try {
+              scanner.clear();
+            } catch (_) {}
+
+            scanner = null;
+            tipoScanner = null;
+          }
+
+          exibirMensagem(
+            mensagem,
+            "Não foi possível abrir a câmera: " +
+              mensagemErroCamera(erro),
+            "erro"
+          );
+        } finally {
+          abrindoCamera = false;
+          atualizarControles();
+        }
+      }
+
+      async function tratarCodigoCadastro(codigo) {
+        const mensagem = el("mensagem-cadastro");
+        const valor = String(codigo).trim();
+
+        el("cadastro-codigo").value = valor;
+        confirmarLeitura();
+
+        try {
+          await pararCamera();
+
+          const { data, error } = await exigirConexao()
+            .from("produtos")
+            .select("id, descricao")
+            .eq("codigo_barras", valor)
+            .maybeSingle();
+
+          if (error) throw error;
+
+          if (data) {
+            exibirMensagem(
+              mensagem,
+              `Este código já está cadastrado: ${data.descricao}. ` +
+              "Não será possível cadastrar novamente.",
+              "aviso"
+            );
+          } else {
+            exibirMensagem(
+              mensagem,
+              "Código lido. Preencha a descrição e salve o produto.",
+              "sucesso"
+            );
+
+            el("cadastro-descricao").focus();
+          }
+        } catch (erro) {
+          registrarErro(mensagem, "Erro ao consultar código", erro);
+        }
+      }
+
+      function traduzirErroLogin(erro) {
+        const mensagem = detalheErro(erro);
+
+        if (/invalid login credentials/i.test(mensagem)) {
+          return "E-mail ou senha incorretos. Confirme se o usuário " +
+            "já foi cadastrado no Supabase Auth.";
+        }
+
+        if (/email not confirmed/i.test(mensagem)) {
+          return "O e-mail deste usuário ainda não foi confirmado.";
+        }
+
+        if (/invalid api key/i.test(mensagem)) {
+          return "Chave pública inválida. Confira a chave e se ela " +
+            "pertence ao mesmo projeto da URL configurada.";
+        }
+
+        if (/failed to fetch|networkerror|network request failed/i.test(mensagem)) {
+          return "Não foi possível alcançar o Supabase. " +
+            "Verifique a internet, a URL do projeto e tente novamente.";
+        }
+
+        return mensagem;
+      }
+
+      // LOGIN
+      el("form-login").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        if (autenticando) return;
+
+        const mensagem = el("mensagem-login");
+        const botao = el("botao-login");
+        const email = el("login-email").value.trim();
+        const senha = el("login-senha").value;
+
+        if (!email || !senha) {
+          exibirMensagem(
+            mensagem,
+            "Informe e-mail e senha.",
+            "erro"
+          );
+          return;
+        }
+
+        autenticando = true;
+        botao.disabled = true;
+        botao.textContent = "Entrando...";
+
+        exibirMensagem(
+          mensagem,
+          "Autenticando no Supabase...",
+          "info"
+        );
+
+        try {
+          const { data, error } = await exigirConexao()
+            .auth.signInWithPassword({
+              email,
+              password: senha
+            });
+
+          if (error) throw error;
+
+          if (!data.session || !data.user) {
+            throw new Error(
+              "O servidor não retornou uma sessão válida."
+            );
+          }
+
+          usuarioAtual = data.user;
+
+          el("usuario-logado").textContent = data.user.email;
+          el("login-senha").value = "";
+
+          limparMensagem(mensagem);
+          limparMensagem(el("mensagem-global"));
+
+          mostrarTela("menu");
+        } catch (erro) {
+          console.error("Falha no login:", erro);
+
+          exibirMensagem(
+            mensagem,
+            "Não foi possível entrar: " + traduzirErroLogin(erro),
+            "erro"
+          );
+        } finally {
+          autenticando = false;
+          botao.disabled = false;
+          botao.textContent = "Entrar";
+        }
+      });
+
+      // SAIR
+      el("botao-sair").addEventListener("click", async () => {
+        const botao = el("botao-sair");
+
+        try {
+          if (registrandoLeitura || finalizandoContagem) {
+            throw new Error(
+              "Aguarde a operação atual terminar antes de sair."
+            );
+          }
+
+          if (
+            contagemAtual &&
+            !window.confirm(
+              "Existe uma contagem aberta. Ela continuará no banco, " +
+              "mas esta versão ainda não tem tela para retomá-la " +
+              "depois de sair. Deseja sair mesmo assim?"
+            )
+          ) {
+            return;
+          }
+
+          botao.disabled = true;
+          await pararCamera();
+
+          const { error } = await exigirConexao().auth.signOut();
+          if (error) throw error;
+
+          usuarioAtual = null;
+          contagemAtual = null;
+          atualizarPainelContagem();
+          mostrarTela("login");
+        } catch (erro) {
+          registrarErro(
+            el("mensagem-global"),
+            "Não foi possível sair",
+            erro
+          );
+        } finally {
+          botao.disabled = false;
+        }
+      });
+
+      // NAVEGAÇÃO
+      el("botao-ir-cadastro").addEventListener("click", () => {
+        mostrarTela("cadastro");
+      });
+
+      el("botao-voltar-cadastro").addEventListener("click", async () => {
+        try {
+          await pararCamera();
+          mostrarTela("menu");
+        } catch (erro) {
+          registrarErro(
+            el("mensagem-cadastro"),
+            "Não foi possível voltar",
+            erro
+          );
+        }
+      });
+
+      el("botao-ir-contagem").addEventListener("click", () => {
+        atualizarPainelContagem();
+        mostrarTela("contagem");
+      });
+
+      el("botao-voltar-contagem").addEventListener("click", async () => {
+        try {
+          if (registrandoLeitura || finalizandoContagem) {
+            throw new Error("Aguarde a operação atual terminar.");
+          }
+
+          await pararCamera();
+
+          // Mantém contagemAtual para continuar pelo menu.
+          mostrarTela("menu");
+        } catch (erro) {
+          registrarErro(
+            el("mensagem-contagem"),
+            "Não foi possível voltar",
+            erro
+          );
+        }
+      });
+
+      // CÂMERAS
+      el("botao-escanear-cadastro").addEventListener("click", () => {
+        void abrirCamera("cadastro");
+      });
+
+      el("botao-escanear-contagem").addEventListener("click", () => {
+        void abrirCamera("contagem");
+      });
+
+      el("botao-parar-cadastro").addEventListener("click", async () => {
+        try {
+          await pararCamera();
+        } catch (erro) {
+          registrarErro(
+            el("mensagem-cadastro"),
+            "Erro ao parar câmera",
+            erro
+          );
+        }
+      });
+
+      el("botao-parar-camera").addEventListener("click", async () => {
+        try {
+          await pararCamera();
+        } catch (erro) {
+          registrarErro(
+            el("resultado-leitura"),
+            "Erro ao parar câmera",
+            erro
+          );
+        }
+      });
+
+      el("botao-proximo-exemplar").addEventListener("click", () => {
+        if (
+          !contagemAtual ||
+          registrandoLeitura ||
+          finalizandoContagem ||
+          tipoScanner !== "contagem" ||
+          !scanner?.isScanning
+        ) {
+          return;
+        }
+
+        prepararAudio();
+        leituraArmada = true;
+        atualizarControles();
+
+        exibirMensagem(
+          el("resultado-leitura"),
+          "Leitura liberada. Posicione o próximo exemplar.",
+          "info"
+        );
+      });
+
+      // SALVAR PRODUTO
+      el("form-produto").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        const botao = el("botao-salvar-produto");
+        const mensagem = el("mensagem-cadastro");
+
+        if (botao.disabled) return;
+
+        const codigo = el("cadastro-codigo").value.trim();
+        const descricao = el("cadastro-descricao").value.trim();
+        const quantidadeTexto = el("cadastro-quantidade").value.trim();
+        const quantidade = Number(quantidadeTexto);
+
+        if (!codigo || !descricao) {
+          exibirMensagem(
+            mensagem,
+            "Informe código e descrição.",
+            "erro"
+          );
+          return;
+        }
+
+        if (
+          quantidadeTexto === "" ||
+          !Number.isSafeInteger(quantidade) ||
+          quantidade < 0 ||
+          quantidade > 2147483647
+        ) {
+          exibirMensagem(
+            mensagem,
+            "Informe uma quantidade inteira válida, maior ou igual a zero.",
+            "erro"
+          );
+          return;
+        }
+
+        botao.disabled = true;
+        botao.textContent = "Salvando...";
+
+        try {
+          await pararCamera();
+
+          const usuario = await obterUsuario();
+
+          const { error } = await db
+            .from("produtos")
+            .insert({
+              codigo_barras: codigo,
+              descricao,
+              autor: el("cadastro-autor").value.trim() || null,
+              categoria: el("cadastro-categoria").value.trim() || null,
+              localizacao:
+                el("cadastro-localizacao").value.trim() || null,
+              quantidade_sistema: quantidade,
+              criado_por: usuario.id
+            });
+
+          if (error) throw error;
+
+          el("form-produto").reset();
+
+          exibirMensagem(
+            mensagem,
+            "Produto cadastrado com sucesso.",
+            "sucesso"
+          );
+
+          el("cadastro-codigo").focus();
+        } catch (erro) {
+          if (erro.code === "23505") {
+            exibirMensagem(
+              mensagem,
+              "Este código de barras já está cadastrado.",
+              "erro"
+            );
+          } else {
+            registrarErro(mensagem, "Erro ao salvar produto", erro);
+          }
+        } finally {
+          botao.disabled = false;
+          botao.textContent = "Salvar produto";
+        }
+      });
+
+      // INICIAR CONTAGEM
+      el("form-contagem").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        if (contagemAtual) return;
+
+        const botao = el("botao-iniciar-contagem");
+        const mensagem = el("mensagem-contagem");
+        const nome = el("contagem-nome").value.trim();
+
+        if (botao.disabled) return;
+
+        if (!nome) {
+          exibirMensagem(
+            mensagem,
+            "Informe o nome da contagem.",
+            "erro"
+          );
+          return;
+        }
+
+        botao.disabled = true;
+        botao.textContent = "Iniciando...";
+
+        try {
+          const usuario = await obterUsuario();
+
+          const { data, error } = await db
+            .from("contagens")
+            .insert({
+              nome,
+              usuario_id: usuario.id,
+              status: "aberta"
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          contagemAtual = data;
+
+          limparMensagem(el("resultado-leitura"));
+          atualizarPainelContagem();
+
+          exibirMensagem(
+            mensagem,
+            "Contagem iniciada. Use a câmera ou informe o código manualmente.",
+            "sucesso"
+          );
+
+          await carregarItensContagem();
+        } catch (erro) {
+          registrarErro(mensagem, "Erro ao iniciar contagem", erro);
+        } finally {
+          botao.textContent = "Iniciar contagem";
+          atualizarPainelContagem();
+        }
+      });
+
+      // REGISTRO MANUAL
+      el("form-manual").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        const codigo = el("codigo-manual").value.trim();
+
+        if (!codigo) return;
+
+        prepararAudio();
+
+        const sucesso = await registrarLeitura(codigo);
+
+        if (sucesso) {
+          el("codigo-manual").value = "";
+          el("codigo-manual").focus();
+        }
+      });
+
+      // REGISTRAR UMA UNIDADE
+      async function registrarLeitura(codigo) {
+        const resultado = el("resultado-leitura");
+        const valor = String(codigo).trim();
+
+        if (registrandoLeitura || finalizandoContagem) return false;
+
+        if (!contagemAtual) {
+          exibirMensagem(
+            resultado,
+            "Inicie uma contagem antes de registrar códigos.",
+            "erro"
+          );
+          return false;
+        }
+
+        if (!valor) return false;
+
+        const contagemId = contagemAtual.id;
+
+        registrandoLeitura = true;
+        leituraArmada = false;
+        atualizarControles();
+
+        exibirMensagem(
+          resultado,
+          "Registrando uma unidade...",
+          "info"
+        );
+
+        try {
+          const { data, error } = await exigirConexao().rpc(
+            "registrar_leitura",
+            {
+              p_contagem_id: contagemId,
+              p_codigo_lido: valor
+            }
+          );
+
+          if (error) throw error;
+
+          if (
+            !data ||
+            !["sucesso", "codigo_desconhecido"].includes(data.status)
+          ) {
+            throw new Error(
+              "A função registrar_leitura retornou uma resposta inesperada."
+            );
+          }
+
+          confirmarLeitura();
+
+          if (data.status === "codigo_desconhecido") {
+            exibirMensagem(
+              resultado,
+              `Uma unidade registrada como pendência.\n` +
+              `Código não cadastrado: ${valor}.`,
+              "aviso"
+            );
+          } else {
+            let descricao = "Produto";
+
+            try {
+              const { data: produto, error: erroProduto } = await db
+                .from("produtos")
+                .select("descricao")
+                .eq("id", data.produto_id)
+                .single();
+
+              if (erroProduto) throw erroProduto;
+              descricao = produto.descricao;
+            } catch (erro) {
+              // A leitura já foi gravada; falhar na descrição não a desfaz.
+              console.warn("Descrição indisponível:", erro);
+            }
+
+            exibirMensagem(
+              resultado,
+              `${descricao}\n` +
+              `Código: ${valor}\n` +
+              `Quantidade contada: ${data.quantidade}`,
+              "sucesso"
+            );
+          }
+
+          try {
+            await carregarItensContagem();
+          } catch (erro) {
+            registrarErro(
+              el("mensagem-contagem"),
+              "A leitura foi registrada, mas a lista não atualizou",
+              erro
+            );
+          }
+
+          return true;
+        } catch (erro) {
+          console.error("Erro ao registrar leitura:", erro);
+
+          exibirMensagem(
+            resultado,
+            `Não foi possível confirmar o registro: ${detalheErro(erro)}\n` +
+            "Em caso de falha de conexão, confira os itens no banco " +
+            "antes de repetir: a requisição pode ter sido processada.",
+            "erro"
+          );
+
+          return false;
+        } finally {
+          registrandoLeitura = false;
+          atualizarControles();
+        }
+      }
+
+      // LISTAR ITENS E AGRUPAR CÓDIGOS DESCONHECIDOS
+      async function carregarItensContagem() {
+        if (!contagemAtual) return;
+
+        const contagemId = contagemAtual.id;
+
+        const { data, error } = await exigirConexao()
+          .from("contagem_itens")
+          .select(`
+            id,
+            codigo_lido,
+            quantidade_contada,
+            codigo_conhecido,
+            produtos (descricao)
+          `)
+          .eq("contagem_id", contagemId)
+          .order("lido_em", { ascending: false });
+
+        if (error) throw error;
+
+        if (!contagemAtual || contagemAtual.id !== contagemId) return;
+
+        const agrupados = new Map();
+
+        for (const item of data || []) {
+          const codigo = item.codigo_lido;
+          const produto = Array.isArray(item.produtos)
+            ? item.produtos[0]
+            : item.produtos;
+
+          if (!agrupados.has(codigo)) {
+            agrupados.set(codigo, {
+              codigo,
+              descricao:
+                produto?.descricao || "Código não cadastrado",
+              quantidade: 0,
+              conhecido: item.codigo_conhecido
+            });
+          }
+
+          agrupados.get(codigo).quantidade +=
+            Number(item.quantidade_contada);
+        }
+
+        const lista = el("lista-contagem");
+        lista.replaceChildren();
+
+        let totalUnidades = 0;
+        let totalPendencias = 0;
+
+        for (const item of agrupados.values()) {
+          totalUnidades += item.quantidade;
+
+          if (!item.conhecido) {
+            totalPendencias += item.quantidade;
+          }
+
+          const linha = document.createElement("div");
+          linha.className = "lista-item";
+
+          const informacoes = document.createElement("span");
+          const descricao = document.createElement("span");
+          descricao.textContent = item.descricao;
+
+          const codigo = document.createElement("small");
+          codigo.textContent = item.codigo;
+
+          informacoes.append(
+            descricao,
+            document.createElement("br"),
+            codigo
+          );
+
+          const quantidade = document.createElement("span");
+          quantidade.className = "contador";
+          quantidade.textContent = String(item.quantidade);
+
+          linha.append(informacoes, quantidade);
+          lista.append(linha);
+        }
+
+        if (!agrupados.size) {
+          const vazio = document.createElement("p");
+          vazio.className = "ajuda";
+          vazio.textContent = "Nenhum item contado ainda.";
+          lista.append(vazio);
+        }
+
+        el("resumo-contagem").textContent =
+          `Unidades contadas: ${totalUnidades} | ` +
+          `Códigos distintos: ${agrupados.size} | ` +
+          `Unidades com código desconhecido: ${totalPendencias}`;
+      }
+
+      // FINALIZAR
+      el("botao-finalizar-contagem").addEventListener("click", async () => {
+        if (
+          !contagemAtual ||
+          registrandoLeitura ||
+          finalizandoContagem
+        ) {
+          return;
+        }
+
+        if (!window.confirm(
+          "Finalizar esta contagem? Ela não aceitará novas leituras."
+        )) {
+          return;
+        }
+
+        const mensagem = el("mensagem-contagem");
+        const botao = el("botao-finalizar-contagem");
+
+        finalizandoContagem = true;
+        leituraArmada = false;
+        botao.textContent = "Finalizando...";
+        atualizarControles();
+
+        try {
+          await pararCamera();
+
+          const { error } = await exigirConexao().rpc(
+            "finalizar_contagem",
+            {
+              p_contagem_id: contagemAtual.id
+            }
+          );
+
+          if (error) throw error;
+
+          const nome = contagemAtual.nome;
+
+          contagemAtual = null;
+          el("form-contagem").reset();
+
+          exibirMensagem(
+            mensagem,
+            `Contagem "${nome}" finalizada. ` +
+            "Os resultados foram gerados no banco.",
+            "sucesso"
+          );
+        } catch (erro) {
+          registrarErro(
+            mensagem,
+            "Não foi possível confirmar a finalização",
+            erro
+          );
+        } finally {
+          finalizandoContagem = false;
+          botao.textContent = "Finalizar contagem";
+          atualizarPainelContagem();
+        }
+      });
+
+      // NÃO PERDER UMA CONTAGEM ABERTA SEM AVISO
+      window.addEventListener("beforeunload", (evento) => {
+        if (!contagemAtual && !registrandoLeitura) return;
+
+        evento.preventDefault();
+        evento.returnValue = "";
+      });
+
+      // ERROS NÃO TRATADOS
+      window.addEventListener("error", (evento) => {
+        if (!evento.message) return;
+
+        console.error("Erro JavaScript:", evento.error || evento.message);
+
+        exibirMensagem(
+          el("mensagem-global"),
+          "Erro no sistema: " + evento.message,
+          "erro"
+        );
+      });
+
+      window.addEventListener("unhandledrejection", (evento) => {
+        console.error("Operação não tratada:", evento.reason);
+
+        exibirMensagem(
+          el("mensagem-global"),
+          "Erro inesperado: " + detalheErro(evento.reason),
+          "erro"
+        );
+      });
+
+      // CONEXÃO E RESTAURAÇÃO DA SESSÃO
+      async function inicializar() {
+        el("botao-login").disabled = true;
+
+        exibirMensagem(
+          el("mensagem-login"),
+          "Inicializando conexão...",
+          "info"
+        );
+
+        try {
+          if (!window.supabase?.createClient) {
+            throw new Error(
+              "A biblioteca Supabase não carregou. " +
+              "Verifique sua internet ou bloqueios de scripts externos."
+            );
+          }
+
+          db = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLIC_KEY
+          );
+
+          db.auth.onAuthStateChange((evento, sessao) => {
+            const usuarioAnterior = usuarioAtual?.id;
+            usuarioAtual = sessao?.user || null;
+
+            if (usuarioAtual) {
+              el("usuario-logado").textContent =
+                usuarioAtual.email || "";
+
+              // Renovar o token não deve tirar o usuário da tela atual.
+              if (
+                evento === "SIGNED_IN" &&
+                usuarioAnterior !== usuarioAtual.id
+              ) {
+                mostrarTela("menu");
+              }
+            } else if (evento === "SIGNED_OUT") {
+              contagemAtual = null;
+              atualizarPainelContagem();
+              mostrarTela("login");
+
+              // Não aguarda operações assíncronas dentro do callback.
+              setTimeout(() => {
+                pararCamera().catch((erro) => {
+                  console.warn("Erro ao encerrar câmera:", erro);
+                });
+              }, 0);
+            }
+          });
+
+          const { data, error } = await db.auth.getSession();
+
+          if (error) throw error;
+
+          if (data.session) {
+            usuarioAtual = data.session.user;
+
+            el("usuario-logado").textContent =
+              usuarioAtual.email || "";
+
+            mostrarTela("menu");
+            limparMensagem(el("mensagem-login"));
+          } else {
+            mostrarTela("login");
+
+            exibirMensagem(
+              el("mensagem-login"),
+              "Informe o e-mail e a senha do usuário cadastrado no Supabase.",
+              "info"
+            );
+          }
+        } catch (erro) {
+          registrarErro(
+            el("mensagem-login"),
+            "Erro ao inicializar",
+            erro
+          );
+        } finally {
+          el("botao-login").disabled = false;
+          atualizarPainelContagem();
+        }
+      }
+
+      void inicializar();
+    })();
+  </script>
+</body>
+</html>
