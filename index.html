@@ -620,48 +620,75 @@
         return data.user;
       }
 
+      // Os sons são gerados localmente, sem baixar arquivos de áudio.
       function prepararAudio() {
         try {
-          const AudioClass =
-            window.AudioContext || window.webkitAudioContext;
-
-          if (!AudioClass) return;
-
-          if (!audioContext) {
+          const AudioClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioClass) return Promise.resolve(null);
+          if (!audioContext || audioContext.state === "closed") {
             audioContext = new AudioClass();
           }
-
-          if (audioContext.state === "suspended") {
-            audioContext.resume().catch(() => {});
+          const contexto = audioContext;
+          if (contexto.state === "suspended") {
+            return contexto.resume().then(() => contexto).catch((erro) => {
+              console.debug("Não foi possível liberar o áudio:", erro);
+              return null;
+            });
           }
+          return Promise.resolve(contexto);
         } catch (erro) {
-          console.debug("Áudio indisponível.", erro);
+          console.debug("Áudio indisponível:", erro);
+          return Promise.resolve(null);
         }
       }
 
-      function confirmarLeitura() {
+      async function tocarSequenciaSonora(notas) {
         try {
-          if (navigator.vibrate) navigator.vibrate(100);
-
-          if (!audioContext || audioContext.state !== "running") {
-            return;
+          const contexto = await prepararAudio();
+          if (!contexto || contexto.state !== "running") return;
+          const agora = contexto.currentTime + 0.01;
+          for (const nota of notas) {
+            const inicio = agora + nota.atraso;
+            const fim = inicio + nota.duracao;
+            const oscilador = contexto.createOscillator();
+            const volume = contexto.createGain();
+            oscilador.type = "sine";
+            oscilador.frequency.setValueAtTime(nota.frequencia, inicio);
+            volume.gain.setValueAtTime(0, inicio);
+            volume.gain.linearRampToValueAtTime(nota.volume ?? 0.16, inicio + 0.008);
+            volume.gain.setValueAtTime(nota.volume ?? 0.16, fim - 0.02);
+            volume.gain.linearRampToValueAtTime(0, fim);
+            oscilador.connect(volume);
+            volume.connect(contexto.destination);
+            oscilador.onended = () => {
+              oscilador.disconnect();
+              volume.disconnect();
+            };
+            oscilador.start(inicio);
+            oscilador.stop(fim + 0.01);
           }
-
-          const oscilador = audioContext.createOscillator();
-          const volume = audioContext.createGain();
-
-          oscilador.type = "sine";
-          oscilador.frequency.value = 880;
-          volume.gain.value = 0.06;
-
-          oscilador.connect(volume);
-          volume.connect(audioContext.destination);
-
-          oscilador.start();
-          oscilador.stop(audioContext.currentTime + 0.12);
         } catch (erro) {
-          console.debug("Feedback indisponível.", erro);
+          // Uma falha no áudio não pode interromper leitura ou gravação.
+          console.debug("Não foi possível emitir o som:", erro);
         }
+      }
+
+      function tocarBipLeitura() {
+        void tocarSequenciaSonora([
+          { frequencia: 1450, atraso: 0, duracao: 0.11, volume: 0.16 }
+        ]);
+      }
+
+      function tocarSomConfirmacao() {
+        try {
+          if (typeof navigator.vibrate === "function") navigator.vibrate(100);
+        } catch (erro) {
+          console.debug("Vibração indisponível:", erro);
+        }
+        void tocarSequenciaSonora([
+          { frequencia: 850, atraso: 0, duracao: 0.12, volume: 0.14 },
+          { frequencia: 1200, atraso: 0.16, duracao: 0.17, volume: 0.14 }
+        ]);
       }
 
       function atualizarControles() {
@@ -862,6 +889,7 @@
 
               if (String(codigo).trim() === codigoEmIntervalo && Date.now() < codigoBloqueadoAte) return;
               leituraArmada = false;
+              tocarBipLeitura();
               atualizarControles();
               void registrarLeitura(codigo);
             },
@@ -902,7 +930,7 @@
         const valor = String(codigo).trim();
 
         el("cadastro-codigo").value = valor;
-        confirmarLeitura();
+        tocarBipLeitura();
 
         try {
           await pararCamera();
@@ -1764,6 +1792,7 @@
 
       el("form-quantidade").addEventListener("submit", async (evento) => {
         evento.preventDefault();
+        void prepararAudio();
         if (!leituraPendente || registrandoLeitura) return;
         const pendente = leituraPendente;
         const qtd = pendente.enviado ? pendente.quantidade : Number(el("leitura-quantidade").value);
@@ -1785,7 +1814,7 @@
           if (!data || !["sucesso", "codigo_desconhecido"].includes(data.status)) {
             throw new Error("Resposta inesperada do banco.");
           }
-          confirmarLeitura();
+          tocarSomConfirmacao();
           leituraPendente = null;
           el("modal-leitura").close();
           exibirMensagem(el("resultado-leitura"),
