@@ -673,21 +673,31 @@
         }
       }
 
+      function vibrarDispositivo(padrao) {
+        try {
+          if (typeof navigator.vibrate === "function") {
+            navigator.vibrate(padrao);
+          }
+        } catch (erro) {
+          // A indisponibilidade da vibração não deve afetar o sistema.
+          console.debug("Vibração indisponível:", erro);
+        }
+      }
+
+      // Código reconhecido pela câmera: bip curto e uma vibração.
       function tocarBipLeitura() {
+        vibrarDispositivo(100);
         void tocarSequenciaSonora([
-          { frequencia: 1450, atraso: 0, duracao: 0.11, volume: 0.16 }
+          { frequencia: 1450, atraso: 0, duracao: 0.14, volume: 0.40 }
         ]);
       }
 
+      // Quantidade salva: dois tons ascendentes e duas vibrações.
       function tocarSomConfirmacao() {
-        try {
-          if (typeof navigator.vibrate === "function") navigator.vibrate(100);
-        } catch (erro) {
-          console.debug("Vibração indisponível:", erro);
-        }
+        vibrarDispositivo([100, 70, 150]);
         void tocarSequenciaSonora([
-          { frequencia: 850, atraso: 0, duracao: 0.12, volume: 0.14 },
-          { frequencia: 1200, atraso: 0.16, duracao: 0.17, volume: 0.14 }
+          { frequencia: 850, atraso: 0, duracao: 0.14, volume: 0.35 },
+          { frequencia: 1200, atraso: 0.18, duracao: 0.20, volume: 0.40 }
         ]);
       }
 
