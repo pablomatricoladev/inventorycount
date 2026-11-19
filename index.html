@@ -291,7 +291,7 @@
       </div>
 
       <div class="card">
-        <h2>Novo livro</h2>
+        <h2>Novo produto</h2>
 
         <form id="form-produto">
           <label for="cadastro-codigo">Código de barras</label>
@@ -321,26 +321,16 @@
           <input
             id="cadastro-descricao"
             type="text"
-            placeholder="Nome do livro"
+            placeholder="Descrição do produto"
             required
-          />
-
-          <label for="cadastro-autor">Autor</label>
-          <input
-            id="cadastro-autor"
-            type="text"
-            placeholder="Autor"
           />
 
           <label for="cadastro-categoria">Categoria</label>
           <select id="cadastro-categoria" required><option value="">Carregando categorias...</option></select>
-
-          <label for="cadastro-localizacao">Localização</label>
-          <input
-            id="cadastro-localizacao"
-            type="text"
-            placeholder="Estante / prateleira"
-          />
+          <div id="grupo-cadastro-autor" class="hidden">
+            <label for="cadastro-autor">Autor</label>
+            <input id="cadastro-autor" type="text" placeholder="Autor" disabled />
+          </div>
 
           <label for="cadastro-quantidade">Quantidade inicial</label>
           <input
@@ -402,20 +392,14 @@
           <p class="ajuda">
             Leia o código, confira a quantidade (inicia em 1 unidade)
             e confirme para gravar. Você pode informar 24 unidades,
-            por exemplo, sem escanear 24 vezes.
+            por exemplo, sem escanear 24 vezes. Após confirmar, a câmera
+            é liberada automaticamente para o próximo código.
           </p>
 
           <button id="botao-escanear-contagem" type="button">
             Abrir câmera
           </button>
 
-          <button
-            id="botao-proximo-exemplar"
-            type="button"
-            class="success hidden"
-          >
-            Ler próximo exemplar
-          </button>
 
           <button
             id="botao-parar-camera"
@@ -442,7 +426,7 @@
               type="submit"
               class="secondary"
             >
-              Registrar uma unidade
+              Informar código e quantidade
             </button>
           </form>
 
@@ -492,9 +476,10 @@
       <form id="form-produto-modal">
         <label for="modal-codigo">Código de barras</label><input id="modal-codigo" type="text" readonly />
         <label for="modal-descricao">Descrição</label><input id="modal-descricao" required />
-        <label for="modal-autor">Autor</label><input id="modal-autor" />
         <label for="modal-categoria">Categoria</label><select id="modal-categoria" required></select>
-        <label for="modal-localizacao">Localização</label><input id="modal-localizacao" />
+        <div id="grupo-modal-autor" class="hidden">
+          <label for="modal-autor">Autor</label><input id="modal-autor" disabled />
+        </div>
         <label for="modal-estoque">Quantidade prevista no sistema</label><input id="modal-estoque" type="number" min="0" step="1" max="2147483647" value="0" required />
         <p class="ajuda">O estoque previsto é independente da quantidade física desta leitura. Se você não tem um saldo de referência, revise o valor antes de fechar o inventário.</p>
         <button id="salvar-produto-modal" type="submit">Salvar cadastro e voltar à quantidade</button>
@@ -522,12 +507,12 @@
             <div class="indicador"><small>Produtos corretos</small><strong id="relatorio-corretos">0</strong></div>
             <div class="indicador"><small>Unidades não cadastradas</small><strong id="relatorio-desconhecidos">0</strong></div>
           </div>
-          <p class="ajuda">Indicadores da contagem inteira. Pendências não entram nas divergências dos produtos. Quantidades previstas são registradas no fechamento; textos e localização vêm do cadastro atual.</p>
+          <p class="ajuda">Indicadores da contagem inteira. Pendências não entram nas divergências dos produtos. Quantidades previstas são registradas no fechamento; textos vêm do cadastro atual.</p>
         </div>
         <div class="card">
           <label for="relatorio-filtro">Situação</label>
           <select id="relatorio-filtro"><option value="todos">Todas</option><option value="faltante">Faltantes</option><option value="excedente">Excedentes</option><option value="correto">Corretos</option><option value="nao_cadastrado">Não cadastrados</option></select>
-          <label for="relatorio-busca">Busca</label><input id="relatorio-busca" type="search" placeholder="Código, descrição ou localização" />
+          <label for="relatorio-busca">Busca</label><input id="relatorio-busca" type="search" placeholder="Código ou descrição" />
           <button id="botao-exportar-relatorio" type="button" class="success" disabled>Exportar CSV dos itens filtrados</button>
           <p id="relatorio-total-exibido" class="ajuda"></p>
           <div class="tabela-container"><table><thead><tr><th>Produto / código</th><th>Previsto</th><th>Contado</th><th>Diferença</th><th>Situação</th></tr></thead><tbody id="relatorio-corpo"></tbody></table></div>
@@ -706,16 +691,6 @@
         el("botao-parar-cadastro").disabled = ocupada;
         el("botao-parar-camera").disabled = ocupada;
 
-        el("botao-proximo-exemplar").classList.toggle(
-          "hidden",
-          !cameraContagem || leituraArmada
-        );
-
-        el("botao-proximo-exemplar").disabled =
-          ocupada ||
-          registrandoLeitura ||
-          finalizandoContagem;
-
         el("botao-registrar-manual").disabled =
           registrandoLeitura ||
           finalizandoContagem ||
@@ -748,6 +723,7 @@
       }
 
       async function pararCamera() {
+        cancelarRetomadaAutomatica();
         if (abrindoCamera) {
           throw new Error(
             "Aguarde a câmera terminar de abrir antes de continuar."
@@ -842,6 +818,9 @@
           abrindoCamera = true;
           tipoScanner = tipo;
           cadastroDetectado = false;
+          cancelarRetomadaAutomatica();
+          codigoEmIntervalo = "";
+          codigoBloqueadoAte = 0;
           leituraArmada = tipo === "contagem";
 
           const destino = tipo === "cadastro"
@@ -881,6 +860,7 @@
                 return;
               }
 
+              if (String(codigo).trim() === codigoEmIntervalo && Date.now() < codigoBloqueadoAte) return;
               leituraArmada = false;
               atualizarControles();
               void registrarLeitura(codigo);
@@ -1170,28 +1150,6 @@
         }
       });
 
-      el("botao-proximo-exemplar").addEventListener("click", () => {
-        if (
-          !contagemAtual ||
-          registrandoLeitura ||
-          finalizandoContagem ||
-          tipoScanner !== "contagem" ||
-          !scanner?.isScanning
-        ) {
-          return;
-        }
-
-        prepararAudio();
-        leituraArmada = true;
-        atualizarControles();
-
-        exibirMensagem(
-          el("resultado-leitura"),
-          "Leitura liberada. Posicione o próximo exemplar.",
-          "info"
-        );
-      });
-
       // SALVAR PRODUTO
       el("form-produto").addEventListener("submit", async (evento) => {
         evento.preventDefault();
@@ -1242,10 +1200,8 @@
             .insert({
               codigo_barras: codigo,
               descricao,
-              autor: el("cadastro-autor").value.trim() || null,
+              autor: categoriaEhLivros(el("cadastro-categoria").value) ? (el("cadastro-autor").value.trim() || null) : null,
               categoria: el("cadastro-categoria").value.trim() || null,
-              localizacao:
-                el("cadastro-localizacao").value.trim() || null,
               quantidade_sistema: quantidade,
               criado_por: usuario.id
             });
@@ -1658,6 +1614,8 @@
           }
           if (lista.some((c) => c.nome === anterior)) seletor.value = anterior;
         }
+        atualizarCampoAutor("cadastro");
+        atualizarCampoAutor("modal");
       }
 
       function novoIdRequisicao() {
@@ -1709,6 +1667,8 @@
           return true;
         } catch (erro) {
           registrarErro(el("resultado-leitura"), "Erro ao preparar leitura", erro);
+          leituraPendente = null;
+          prepararRetomadaAutomatica(valor);
           return false;
         } finally {
           registrandoLeitura = false;
@@ -1759,8 +1719,7 @@
           const usuario = await obterUsuario();
           const { data, error } = await db.from("produtos").insert({
             codigo_barras: leituraPendente.codigo, descricao, categoria,
-            autor: el("modal-autor").value.trim() || null,
-            localizacao: el("modal-localizacao").value.trim() || null,
+            autor: categoriaEhLivros(categoria) ? (el("modal-autor").value.trim() || null) : null,
             quantidade_sistema: estoque, criado_por: usuario.id
           }).select("id,descricao,ativo").single();
           let produto = data;
@@ -1790,9 +1749,11 @@
 
       function cancelarLeituraPendente() {
         if (registrandoLeitura || leituraPendente?.enviado) return;
+        const codigoCancelado = leituraPendente?.codigo || "";
         leituraPendente = null;
         el("modal-leitura").close();
-        exibirMensagem(el("resultado-leitura"), "Leitura cancelada. Nenhuma unidade foi adicionada.", "info");
+        prepararRetomadaAutomatica(codigoCancelado);
+        exibirMensagem(el("resultado-leitura"), "Leitura cancelada. Nenhuma unidade foi adicionada. A câmera será liberada automaticamente.", "info");
         atualizarControles();
       }
       el("cancelar-leitura").addEventListener("click", cancelarLeituraPendente);
@@ -1830,12 +1791,12 @@
           exibirMensagem(el("resultado-leitura"),
             `${pendente.produto?.descricao || "Código não cadastrado"}\n` +
             `Adicionado: ${qtd} un. | Total deste código: ${data.quantidade} un.\n` +
-            "Posicione o próximo item e toque em Ler próximo exemplar.",
+            "Posicione o próximo item. A câmera será liberada automaticamente.",
             data.status === "sucesso" ? "sucesso" : "aviso");
           try { await carregarItensContagem(); }
           catch (erro) { registrarErro(el("mensagem-contagem"), "Quantidade salva, mas a lista não atualizou", erro); }
-          // Só libera a próxima detecção depois que a confirmação terminou.
-          leituraArmada = false;
+          // A confirmação foi salva; libera automaticamente após uma breve pausa.
+          prepararRetomadaAutomatica(pendente.codigo);
         } catch (erro) {
           registrarErro(el("mensagem-quantidade"),
             "Não foi possível confirmar. Tente novamente com o mesmo botão; a identificação da requisição foi mantida para evitar duplicidade", erro);
@@ -1874,7 +1835,7 @@
         const filtro = el("relatorio-filtro").value;
         const busca = textoBuscaRelatorio(el("relatorio-busca").value.trim());
         return itensRelatorio.filter((i) => (filtro === "todos" || filtro === i.situacao) &&
-          (!busca || textoBuscaRelatorio(`${i.codigo} ${i.descricao} ${i.localizacao}`).includes(busca)));
+          (!busca || textoBuscaRelatorio(`${i.codigo} ${i.descricao}`).includes(busca)));
       }
       function controlesRelatorio() {
         el("relatorio-contagem").disabled = carregandoRelatorios;
@@ -1949,7 +1910,7 @@
         try {
           const [resultados, pendencias] = await Promise.all([
             paginasRelatorio(() => exigirConexao().from("contagem_resultados")
-              .select("id,quantidade_sistema,quantidade_contada,diferenca,status,produtos(codigo_barras,descricao,localizacao)")
+              .select("id,quantidade_sistema,quantidade_contada,diferenca,status,produtos(codigo_barras,descricao)")
               .eq("contagem_id",id).order("id"), validar),
             paginasRelatorio(() => exigirConexao().from("contagem_itens")
               .select("id,codigo_lido,quantidade_contada").eq("contagem_id",id)
@@ -1959,13 +1920,13 @@
           const linhas = resultados.map((r) => {
             const p=Array.isArray(r.produtos) ? r.produtos[0] : r.produtos;
             return {codigo:p?.codigo_barras || "",descricao:p?.descricao || "Produto indisponível",
-              localizacao:p?.localizacao || "",previsto:Number(r.quantidade_sistema),
+              previsto:Number(r.quantidade_sistema),
               contado:Number(r.quantidade_contada),diferenca:Number(r.diferenca),situacao:r.status};
           });
           const desconhecidos = new Map();
           for (const p of pendencias) {
             if (!desconhecidos.has(p.codigo_lido)) desconhecidos.set(p.codigo_lido,{
-              codigo:p.codigo_lido,descricao:"Código não cadastrado na contagem",localizacao:"",
+              codigo:p.codigo_lido,descricao:"Código não cadastrado na contagem",
               previsto:null,contado:0,diferenca:null,situacao:"nao_cadastrado"});
             desconhecidos.get(p.codigo_lido).contado += Number(p.quantidade_contada);
           }
@@ -2003,7 +1964,7 @@
           const tr=document.createElement("tr");
           const td=document.createElement("td");
           const desc=document.createElement("span");desc.textContent=i.descricao;td.append(desc);
-          for(const texto of [i.codigo,i.localizacao].filter(Boolean)) {
+          for(const texto of [i.codigo].filter(Boolean)) {
             const small=document.createElement("small");small.textContent=texto;td.append(small);
           }
           tr.append(td);
@@ -2031,11 +1992,11 @@
         try {
           const itens=itensFiltradosRelatorio();
           if(!contagemRelatorio||!itens.length||carregandoRelatorios)throw new Error("Selecione um relatório com itens.");
-          const cab=["Contagem","ID","Início","Fechamento","Código de barras","Descrição","Localização","Previsto","Contado","Diferença","Situação"];
+          const cab=["Contagem","ID","Início","Fechamento","Código de barras","Descrição","Previsto","Contado","Diferença","Situação"];
           const linhas=[cab.map((v)=>campoCSV(v)).join(";")];
           for(const i of itens)linhas.push([contagemRelatorio.nome,contagemRelatorio.id,
             dataRelatorio(contagemRelatorio.data_inicio),dataRelatorio(contagemRelatorio.data_fechamento),
-            i.codigo,i.descricao,i.localizacao,i.previsto,i.contado,i.diferenca,rotulosSituacao[i.situacao]||i.situacao]
+            i.codigo,i.descricao,i.previsto,i.contado,i.diferenca,rotulosSituacao[i.situacao]||i.situacao]
             .map((v,k)=>campoCSV(v,k===4)).join(";"));
           const blob=new Blob(["\uFEFF"+linhas.join("\r\n")],{type:"text/csv;charset=utf-8;"});
           const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;
@@ -2052,6 +2013,59 @@
       el("relatorio-busca").addEventListener("input",renderizarRelatorio);
       el("botao-exportar-relatorio").addEventListener("click",exportarRelatorio);
 
+
+      function categoriaEhLivros(valor) {
+        return String(valor || "").trim().toLocaleLowerCase("pt-BR") === "livros";
+      }
+      function atualizarCampoAutor(prefixo) {
+        const visivel = categoriaEhLivros(el(`${prefixo}-categoria`).value);
+        el(`grupo-${prefixo}-autor`).classList.toggle("hidden", !visivel);
+        const campo = el(`${prefixo}-autor`);
+        campo.disabled = !visivel;
+        if (!visivel) campo.value = "";
+      }
+      for (const prefixo of ["cadastro", "modal"]) {
+        el(`${prefixo}-categoria`).addEventListener("change", () => atualizarCampoAutor(prefixo));
+      }
+      el("form-produto").addEventListener("reset", () => {
+        setTimeout(() => atualizarCampoAutor("cadastro"), 0);
+      });
+      el("form-produto-modal").addEventListener("reset", () => {
+        setTimeout(() => atualizarCampoAutor("modal"), 0);
+      });
+
+      let temporizadorProximaLeitura = null;
+      let codigoEmIntervalo = "";
+      let codigoBloqueadoAte = 0;
+      const PAUSA_ENTRE_LEITURAS_MS = 900;
+      const INTERVALO_MESMO_CODIGO_MS = 2500;
+
+      function cancelarRetomadaAutomatica() {
+        clearTimeout(temporizadorProximaLeitura);
+        temporizadorProximaLeitura = null;
+      }
+      function prepararRetomadaAutomatica(codigo = "") {
+        cancelarRetomadaAutomatica();
+        leituraArmada = false;
+        if (codigo) {
+          codigoEmIntervalo = String(codigo).trim();
+          codigoBloqueadoAte = Date.now() + INTERVALO_MESMO_CODIGO_MS;
+        }
+        if (tipoScanner !== "contagem" || !scanner?.isScanning || !contagemAtual) return;
+        temporizadorProximaLeitura = setTimeout(() => {
+          temporizadorProximaLeitura = null;
+          if (tipoScanner === "contagem" && scanner?.isScanning && contagemAtual &&
+              !leituraPendente && !registrandoLeitura && !finalizandoContagem &&
+              !parandoCamera && !abrindoCamera &&
+              !telas.contagem.classList.contains("hidden")) {
+            leituraArmada = true;
+            atualizarControles();
+          }
+        }, PAUSA_ENTRE_LEITURAS_MS);
+      }
+
+      atualizarCampoAutor("cadastro");
+      atualizarCampoAutor("modal");
       void inicializar();
     })();
   </script>
