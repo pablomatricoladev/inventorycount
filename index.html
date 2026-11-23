@@ -17,178 +17,144 @@
   <style>
 
 :root {
-  --brand-primary: #1B4B8F;
-  --brand-accent: #16A34A;
-  --brand-gray: #6B7280;
-  --brand-white: #FFFFFF;
-  --brand-black: #000000;
-  --font-family: "Poppins", sans-serif;
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  --page-bg:#F5F7FB;
-  --text-primary:#172A46;
-  --border:#E2E8F1;
-  --primary-soft:#EDF3FC;
-  --primary-hover:#153D75;
-  --accent-soft:#F0FDF4;
-  --accent-hover:#15803D;
-  --shadow:0 8px 30px rgba(27,75,143,.045);
-  --radius:18px;
+ --brand-primary:#1B4B8F; --brand-accent:#16A34A; --brand-gray:#6B7280;
+ --brand-white:#FFFFFF; --brand-black:#000000; --font-family:"Poppins",sans-serif;
+ --font-weight-regular:400; --font-weight-medium:500; --font-weight-semibold:600; --font-weight-bold:700;
+ --bg:#F5F7FB; --ink:#172A46; --line:#E2E8F1; --soft:#EDF3FC; --radius:18px;
+ --shadow:0 8px 30px #1B4B8F0B;
 }
 * { box-sizing:border-box; margin:0; padding:0; }
-body {
-  font-family:var(--font-family); font-weight:var(--font-weight-regular);
-  background:var(--page-bg); color:var(--text-primary); min-height:100vh;
-  padding:0 24px; font-size:14px; line-height:1.65; -webkit-font-smoothing:antialiased;
-}
+body { font-family:var(--font-family); font-weight:var(--font-weight-regular); background:var(--bg); color:var(--ink); min-height:100vh; padding:0 24px; font-size:14px; line-height:1.65; -webkit-font-smoothing:antialiased; }
 input,select,button { font:inherit; }
 .container { max-width:1080px; margin:auto; padding:28px 0 16px; }
-.brand-name { color:var(--brand-primary); font-weight:var(--font-weight-bold); letter-spacing:-0.02em; font-size:22px; line-height:1.2; }
-.brand-tagline { color:var(--brand-gray); font-weight:var(--font-weight-regular); font-size:11px; margin-top:4px; }
-.app-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:32px; padding-bottom:23px; border-bottom:1px solid var(--border); }
-.brand { display:flex; gap:12px; align-items:center; }
-.brand-symbol { display:grid; place-items:center; height:45px; width:45px; border-radius:13px; background:var(--brand-primary); color:var(--brand-white); position:relative; flex-shrink:0; }
-.brand-symbol::after { content:""; width:9px; height:9px; background:var(--brand-accent); border:2px solid var(--brand-white); border-radius:50%; position:absolute; right:-2px; bottom:-1px; }
+.app-header { display:flex; align-items:center; justify-content:space-between; gap:16px; border-bottom:1px solid var(--line); padding-bottom:23px; margin-bottom:32px; }
+.brand { display:flex; align-items:center; gap:12px; }
+.brand-symbol { height:45px; width:45px; flex-shrink:0; border-radius:13px; display:grid; place-items:center; background:var(--brand-primary); color:white; position:relative; }
+.brand-symbol::after { content:""; position:absolute; right:-2px; bottom:-1px; height:9px; width:9px; border:2px solid white; background:var(--brand-accent); border-radius:50%; }
 .brand-symbol svg { width:25px; height:25px; }
-.header-label { padding:7px 12px; border:1px solid var(--border); color:var(--brand-gray); background:var(--brand-white); font-size:11px; border-radius:99px; }
-h1,h2,h3 { color:var(--text-primary); font-weight:var(--font-weight-semibold); line-height:1.3; letter-spacing:-.035em; }
-h1 { font-size:28px; margin-bottom:10px; }
-h2 { font-size:20px; margin-bottom:15px; }
-.card { background:var(--brand-white); border:1px solid var(--border); border-radius:var(--radius); padding:30px; margin-bottom:20px; box-shadow:var(--shadow); }
-.eyebrow { text-transform:uppercase; letter-spacing:1.6px; font-size:10px; font-weight:var(--font-weight-semibold); color:var(--brand-primary); margin-bottom:9px; }
+.brand-name { color:var(--brand-primary); font-weight:var(--font-weight-bold); letter-spacing:-.02em; font-size:22px; line-height:1.2; }
+.brand-tagline { color:var(--brand-gray); font-weight:var(--font-weight-regular); font-size:11px; margin-top:4px; }
+.header-label { font-size:11px; color:var(--brand-gray); border:1px solid var(--line); border-radius:99px; background:white; padding:7px 12px; }
+h1,h2,h3 { color:var(--ink); font-weight:600; letter-spacing:-.035em; line-height:1.3; }
+h1 { font-size:28px; margin-bottom:10px; } h2 { font-size:20px; margin-bottom:15px; }
+.card { background:white; padding:30px; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:20px; }
+.eyebrow { text-transform:uppercase; font-size:10px; letter-spacing:1.6px; font-weight:600; color:var(--brand-primary); margin-bottom:9px; }
 .subtitulo { color:var(--brand-gray); font-size:13px; line-height:1.85; margin-bottom:24px; max-width:620px; }
-label { display:block; margin:18px 0 7px; color:#44536B; font-size:12px; font-weight:var(--font-weight-medium); }
-input,select { width:100%; min-height:49px; padding:12px 14px; border:1px solid #D7DFEB; border-radius:10px; background:#FCFDFF; color:var(--text-primary); font-size:16px; transition:border-color .16s,box-shadow .16s; }
+label { display:block; color:#44536B; font-size:12px; font-weight:500; margin:18px 0 7px; }
+input,select { width:100%; min-height:49px; padding:12px 14px; border:1px solid #D7DFEB; border-radius:10px; background:#FCFDFF; color:var(--ink); font-size:16px; transition:border-color .16s,box-shadow .16s; }
 input::placeholder { color:#8B96A7; font-size:13px; opacity:1; }
 input:hover,select:hover { border-color:#AEBFD8; }
-input:focus,select:focus { outline:none; border-color:var(--brand-primary); box-shadow:0 0 0 3px #1B4B8F14; background:var(--brand-white); }
-input[readonly] { color:var(--brand-gray); background:#F1F4F8; }
-input:disabled,select:disabled { background:#F1F4F8; opacity:.65; cursor:not-allowed; }
-button { width:100%; min-height:48px; padding:12px 18px; margin-top:16px; border:1px solid transparent; border-radius:10px; color:var(--brand-white); background:var(--brand-primary); font-size:13px; font-weight:var(--font-weight-semibold); line-height:1.55; cursor:pointer; touch-action:manipulation; transition:background .16s,transform .16s,box-shadow .16s; }
-button:hover:not(:disabled) { background:var(--primary-hover); box-shadow:0 5px 16px #1B4B8F1A; }
+input:focus,select:focus { outline:0; border-color:var(--brand-primary); box-shadow:0 0 0 3px #1B4B8F14; background:white; }
+input[readonly],input:disabled,select:disabled { background:#F1F4F8; color:var(--brand-gray); }
+input:disabled,select:disabled { opacity:.65; cursor:not-allowed; }
+button { width:100%; min-height:48px; padding:12px 18px; margin-top:16px; border:1px solid transparent; border-radius:10px; background:var(--brand-primary); color:white; font-size:13px; font-weight:600; line-height:1.55; cursor:pointer; touch-action:manipulation; transition:background .16s,transform .16s,box-shadow .16s; }
+button:hover:not(:disabled) { background:#153D75; box-shadow:0 5px 16px #1B4B8F1A; }
 button:active:not(:disabled) { transform:translateY(1px); }
-button:focus-visible { outline:3px solid #7B9DCB; outline-offset:3px; }
+button:focus-visible,summary:focus-visible { outline:3px solid #7B9DCB; outline-offset:3px; }
 button.secondary { background:#EFF3F9; color:var(--brand-primary); border-color:#DFE7F1; }
 button.secondary:hover:not(:disabled) { background:#E3EBF6; box-shadow:none; }
-button.success,#botao-salvar-produto,#salvar-produto-modal { background:var(--brand-accent); color:var(--brand-white); }
-button.success:hover:not(:disabled),#botao-salvar-produto:hover:not(:disabled),#salvar-produto-modal:hover:not(:disabled) { background:var(--accent-hover); }
+button.success,#botao-salvar-produto,#salvar-produto-modal { background:var(--brand-accent); }
+button.success:hover:not(:disabled),#botao-salvar-produto:hover:not(:disabled),#salvar-produto-modal:hover:not(:disabled) { background:#15803D; }
 button.danger { background:#FFF2F1; color:#A73939; border-color:#F2DAD7; }
 button.danger:hover:not(:disabled) { background:#FCE5E3; box-shadow:none; }
 button:disabled { opacity:.48; cursor:not-allowed; box-shadow:none; }
 .hidden { display:none !important; }
 .topo { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-bottom:22px; }
-.topo strong { font-weight:var(--font-weight-medium); font-size:13px; color:var(--brand-gray); overflow-wrap:anywhere; }
-.topo button { margin:0; min-height:36px; width:auto; padding:7px 13px; font-size:11px; flex-shrink:0; }
-.mensagem { margin-top:14px; padding:12px 14px; border:1px solid transparent; border-radius:10px; font-size:12px; line-height:1.75; white-space:pre-line; overflow-wrap:anywhere; }
+.topo strong { font-size:13px; font-weight:500; color:var(--brand-gray); overflow-wrap:anywhere; }
+.topo button { width:auto; min-height:36px; padding:7px 13px; font-size:11px; margin:0; flex-shrink:0; }
+.mensagem { font-size:12px; line-height:1.75; border:1px solid transparent; padding:12px 14px; margin-top:14px; border-radius:10px; white-space:pre-line; overflow-wrap:anywhere; }
 .sucesso { background:#F0FDF4; color:#166534; border-color:#D3EEDD; }
 .erro { background:#FFF1F0; color:#9F3535; border-color:#F3D9D6; }
 .aviso { background:#FFFAEB; color:#856322; border-color:#F2E6C8; }
-.info { background:var(--primary-soft); color:var(--brand-primary); border-color:#DAE6F7; }
+.info { background:var(--soft); color:var(--brand-primary); border-color:#DAE6F7; }
 #mensagem-global:not(:empty) { margin-bottom:20px; }
-.ajuda { margin-top:12px; color:var(--brand-gray); font-size:11px; line-height:1.85; }
-.reader { width:100%; overflow:hidden; border-radius:14px; background:#13243D; margin-top:18px; }
+.ajuda { color:var(--brand-gray); font-size:11px; line-height:1.85; margin-top:12px; }
+.reader { width:100%; overflow:hidden; border-radius:14px; background:#13243D; margin-top:18px; scroll-margin-block:20px; }
 .reader:empty { display:none; }
 .reader video { width:100% !important; display:block; }
-.resumo { background:var(--primary-soft); color:var(--brand-primary); border:1px solid #DAE6F7; padding:14px 16px; border-radius:11px; margin-bottom:12px; font-size:12px; line-height:1.9; }
+#reader-contagem { outline:none; }
+#reader-contagem:focus-visible { outline:3px solid #7B9DCB; outline-offset:4px; }
+.resumo { background:var(--soft); color:var(--brand-primary); border:1px solid #DAE6F7; padding:14px 16px; border-radius:11px; margin-bottom:12px; font-size:12px; line-height:1.9; }
 .lista-item { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:16px 3px; border-bottom:1px solid #EDF0F5; font-size:13px; }
 .lista-item:last-child { border-bottom:0; }
 .lista-item span:first-child { overflow-wrap:anywhere; }
 .lista-item small { color:var(--brand-gray); font-size:11px; }
-.contador { background:var(--primary-soft); color:var(--brand-primary); min-width:42px; height:36px; border-radius:9px; display:grid; place-items:center; font-weight:var(--font-weight-semibold); font-size:17px; padding:0 8px; flex-shrink:0; }
-dialog { width:min(94vw,520px); max-height:90vh; max-height:90dvh; overflow:auto; margin:auto; padding:30px; border:1px solid var(--border); border-radius:21px; background:var(--brand-white); color:var(--text-primary); box-shadow:0 24px 100px #102E5938; }
+.contador { display:grid; place-items:center; min-width:42px; height:36px; padding:0 8px; border-radius:9px; background:var(--soft); color:var(--brand-primary); font-size:17px; font-weight:600; flex-shrink:0; }
+dialog { width:min(94vw,520px); max-height:90vh; max-height:90dvh; overflow:auto; margin:auto; padding:30px; border:1px solid var(--line); border-radius:21px; background:white; color:var(--ink); box-shadow:0 24px 100px #102E5938; }
 dialog::backdrop { background:#102340B3; backdrop-filter:blur(4px); }
-dialog h2 { font-size:22px; }
-dialog p { margin-top:10px; line-height:1.75; }
-.linha-acoes { display:flex; gap:10px; align-items:stretch; }
-.linha-acoes button { flex:1; }
-#leitura-descricao { font-weight:var(--font-weight-semibold); }
+dialog h2 { font-size:22px; } dialog p { margin-top:10px; line-height:1.75; }
+.linha-acoes { display:flex; gap:10px; align-items:stretch; } .linha-acoes button { flex:1; }
+#leitura-descricao { font-weight:600; }
 #leitura-codigo { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:12px; background:#F3F6FA; padding:9px 11px; border-radius:7px; }
-#leitura-quantidade { height:82px; text-align:center; font-weight:var(--font-weight-semibold); font-size:36px; color:var(--brand-primary); }
+#leitura-quantidade { height:82px; text-align:center; font-weight:600; font-size:36px; color:var(--brand-primary); }
 .grade-resumo { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:22px 0; }
-.indicador { background:#F8FAFD; border:1px solid var(--border); padding:18px; border-radius:13px; }
-.indicador small { display:block; min-height:36px; font-size:10px; color:var(--brand-gray); margin-bottom:8px; line-height:1.65; }
-.indicador strong { color:var(--brand-primary); font-weight:var(--font-weight-semibold); font-size:30px; letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
-#relatorio-corretos { color:var(--brand-accent); }
-#relatorio-faltantes { color:#BA4D42; }
-#relatorio-excedentes,#relatorio-desconhecidos { color:#997425; }
-.tabela-container { width:100%; overflow-x:auto; margin-top:20px; border:1px solid var(--border); border-radius:12px; }
+.indicador { background:#F8FAFD; border:1px solid var(--line); padding:18px; border-radius:13px; }
+.indicador small { display:block; min-height:36px; color:var(--brand-gray); font-size:10px; line-height:1.65; margin-bottom:8px; }
+.indicador strong { color:var(--brand-primary); font-size:30px; font-weight:600; letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+#relatorio-corretos { color:var(--brand-accent); } #relatorio-faltantes { color:#BA4D42; } #relatorio-excedentes,#relatorio-desconhecidos { color:#997425; }
+.tabela-container { width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:12px; margin-top:20px; }
 table { width:100%; border-collapse:collapse; font-size:12px; }
 th,td { text-align:left; padding:14px 12px; border-bottom:1px solid #E9EDF4; vertical-align:top; }
-th { background:#F4F7FC; color:#65738A; font-size:10px; font-weight:var(--font-weight-semibold); letter-spacing:.4px; white-space:nowrap; }
-tr:last-child td { border-bottom:0; }
-tbody tr:hover { background:#FAFCFF; }
-td small { display:block; font-size:10px; color:var(--brand-gray); margin-top:5px; }
-td:not(:first-child) { font-variant-numeric:tabular-nums; }
+th { background:#F4F7FC; color:#65738A; font-size:10px; font-weight:600; letter-spacing:.4px; white-space:nowrap; }
+tr:last-child td { border-bottom:0; } tbody tr:hover { background:#FAFCFF; }
+td small { display:block; color:var(--brand-gray); font-size:10px; margin-top:5px; } td:not(:first-child) { font-variant-numeric:tabular-nums; }
 .metadados-relatorio { white-space:pre-line; overflow-wrap:anywhere; font-size:11px; color:var(--brand-gray); line-height:1.9; }
 .app-footer { text-align:center; padding:28px 0 10px; color:var(--brand-gray); font-size:10px; }
 #tela-cadastro,#tela-contagem { max-width:760px; margin:auto; }
-#form-manual { border-top:1px solid var(--border); padding-top:7px; margin-top:20px; }
-#botao-finalizar-contagem { margin-top:24px; }
-/* Login */
 #tela-login { display:grid; grid-template-columns:.95fr 1fr; max-width:940px; min-height:510px; padding:0; margin:45px auto; overflow:hidden; }
-.login-story { background:var(--brand-primary); padding:44px 35px; color:var(--brand-white); position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; }
+.login-story { background:var(--brand-primary); padding:44px 35px; color:white; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; }
 .login-story::after { content:""; position:absolute; height:350px; width:350px; border:1px solid #FFFFFF16; border-radius:50%; right:-160px; bottom:-85px; box-shadow:0 0 0 55px #FFFFFF05,0 0 0 110px #FFFFFF03; pointer-events:none; }
-.login-story .eyebrow { color:#BBD1F1; }
-.login-story h2 { color:var(--brand-white); font-size:35px; line-height:1.25; margin:18px 0; letter-spacing:-.04em; }
+.login-story .eyebrow { color:#BBD1F1; } .login-story h2 { color:white; font-size:35px; line-height:1.25; margin:18px 0; letter-spacing:-.04em; }
 .login-story p { color:#D8E4F5; font-size:12px; line-height:1.95; max-width:280px; }
 .story-bottom { margin-top:42px; position:relative; z-index:1; }
 .barcode-mark { display:flex; gap:4px; align-items:center; height:40px; margin-bottom:16px; }
-.barcode-mark i { height:100%; width:3px; border-radius:1px; background:#CFDEF4; }
-.barcode-mark i:nth-child(3n) { width:7px; }
-.barcode-mark i:nth-child(4n) { height:72%; }
+.barcode-mark i { height:100%; width:3px; border-radius:1px; background:#CFDEF4; } .barcode-mark i:nth-child(3n) { width:7px; } .barcode-mark i:nth-child(4n) { height:72%; }
 .story-bottom span { font-size:9px; text-transform:uppercase; letter-spacing:1.5px; color:#D0DFF4; }
-.login-form-panel { padding:44px 37px; align-self:center; }
-.login-form-panel h1 { font-size:27px; }
-.login-form-panel .subtitulo { font-size:12px; margin-bottom:24px; }
-#botao-login { margin-top:24px; }
-.login-note { text-align:center; color:var(--brand-gray); font-size:10px; margin-top:22px; }
-/* Menu principal */
-.home-heading { margin:8px 0 28px; }
-.home-heading h1 { font-size:32px; }
-.home-heading .subtitulo { margin-bottom:0; }
+.login-form-panel { padding:44px 37px; align-self:center; } .login-form-panel h1 { font-size:27px; } .login-form-panel .subtitulo { font-size:12px; margin-bottom:24px; }
+#botao-login { margin-top:24px; } .login-note { text-align:center; color:var(--brand-gray); font-size:10px; margin-top:22px; }
+.home-heading { margin:8px 0 28px; } .home-heading h1 { font-size:32px; } .home-heading .subtitulo { margin-bottom:0; }
 .home-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
-.home-actions button { position:relative; display:flex; flex-direction:column; align-items:flex-start; text-align:left; min-height:220px; padding:25px; margin:0; background:var(--brand-white); color:var(--text-primary); border:1px solid var(--border); border-radius:17px; box-shadow:var(--shadow); }
-.home-actions button:hover:not(:disabled) { background:var(--brand-white); border-color:#AEC4E2; box-shadow:0 12px 28px #1B4B8F0E; transform:translateY(-3px); }
-.action-icon { display:grid; place-items:center; width:44px; height:44px; margin-bottom:22px; background:var(--primary-soft); border-radius:12px; color:var(--brand-primary); }
-.action-icon svg { width:23px; height:23px; }
-#botao-ir-contagem .action-icon { color:var(--brand-accent); background:var(--accent-soft); }
-.action-title { font-size:16px; font-weight:var(--font-weight-semibold); letter-spacing:-.02em; }
-.action-description { color:var(--brand-gray); font-size:11px; font-weight:var(--font-weight-regular); line-height:1.85; margin-top:8px; }
-.action-arrow { position:absolute; right:21px; top:29px; color:#9AAFCB; font-size:21px; font-weight:var(--font-weight-regular); }
-.home-tip { display:flex; align-items:flex-start; gap:12px; background:#EDF3FC; color:#526B8D; border:1px solid #DEE8F6; padding:18px 20px; border-radius:12px; margin-top:24px; font-size:11px; line-height:1.85; }
-.home-tip svg { height:19px; width:19px; flex-shrink:0; margin-top:1px; }
+.home-actions button { position:relative; display:flex; flex-direction:column; align-items:flex-start; text-align:left; min-height:220px; padding:25px; margin:0; background:white; color:var(--ink); border:1px solid var(--line); border-radius:17px; box-shadow:var(--shadow); }
+.home-actions button:hover:not(:disabled) { background:white; border-color:#AEC4E2; box-shadow:0 12px 28px #1B4B8F0E; transform:translateY(-3px); }
+.action-icon { display:grid; place-items:center; width:44px; height:44px; margin-bottom:22px; background:var(--soft); border-radius:12px; color:var(--brand-primary); } .action-icon svg { width:23px; height:23px; }
+#botao-ir-contagem .action-icon { color:var(--brand-accent); background:#F0FDF4; }
+.action-title { font-size:16px; font-weight:600; letter-spacing:-.02em; } .action-description { color:var(--brand-gray); font-size:11px; font-weight:400; line-height:1.85; margin-top:8px; }
+.action-arrow { position:absolute; right:21px; top:29px; color:#9AAFCB; font-size:21px; font-weight:400; }
+.home-tip { display:flex; align-items:flex-start; gap:12px; background:#EDF3FC; color:#526B8D; border:1px solid #DEE8F6; padding:18px 20px; border-radius:12px; margin-top:24px; font-size:11px; line-height:1.85; } .home-tip svg { height:19px; width:19px; flex-shrink:0; margin-top:1px; }
+/* Opções de sessão e painéis recolhíveis */
+.remember-label { display:flex; align-items:center; gap:9px; cursor:pointer; margin-top:17px; font-size:12px; }
+.remember-label input { appearance:auto; width:18px; height:18px; min-height:0; padding:0; margin:0; accent-color:var(--brand-primary); flex-shrink:0; }
+.remember-help { margin-top:5px; font-size:10px; color:var(--brand-gray); }
+.user-caption { display:block; text-transform:uppercase; letter-spacing:1px; color:var(--brand-gray); font-size:9px; }
+#usuario-logado { color:var(--brand-primary); }
+details.collapsible { padding:0; overflow:visible; }
+.collapsible>summary { list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:20px 24px; border-radius:var(--radius); }
+.collapsible>summary::-webkit-details-marker { display:none; }
+.collapsible>summary::after { content:""; height:8px; width:8px; border-right:2px solid var(--brand-primary); border-bottom:2px solid var(--brand-primary); transform:rotate(45deg); transition:transform .16s; flex-shrink:0; margin-right:4px; }
+.collapsible[open]>summary::after { transform:rotate(225deg); }
+.collapsible>summary:hover { background:#F8FAFE; }
+.collapsible>summary h2 { font-size:16px; margin:0; }
+.summary-caption { display:block; color:var(--brand-gray); font-size:10px; margin-top:5px; font-weight:400; }
+.panel-content { padding:0 24px 24px; border-top:1px solid #EEF2F7; }
+.panel-content>.resumo { margin-top:18px; }
+.manual-panel { border:1px solid var(--line); border-radius:12px; margin-top:22px; background:#FAFCFF; }
+.manual-panel>summary { padding:14px 16px; font-size:12px; font-weight:500; }
+.manual-panel>summary::after { height:6px; width:6px; }
+.manual-panel .panel-content { padding:0 16px 18px; }
+.contagem-feedback:has(>.mensagem) { margin:-8px 0 20px; }
+.contagem-actions { margin-bottom:20px; } .contagem-actions button { margin-top:0; }
+.camera-hint { font-size:11px; margin-top:12px; color:var(--brand-gray); }
 @media(min-width:820px) { #form-produto { max-width:620px; margin:auto; } }
 @media(max-width:720px) {
- body { padding:0 16px; }
- .container { padding-top:20px; }
- .app-header { margin-bottom:24px; padding-bottom:18px; }
- .brand-symbol { width:39px; height:39px; border-radius:11px; }
- .brand-name { font-size:19px; }
- .brand-tagline { font-size:10px; }
- .header-label { display:none; }
- .card { padding:22px; border-radius:16px; }
- h1 { font-size:24px; } h2 { font-size:19px; }
- #tela-login { grid-template-columns:1fr; margin:22px auto; max-width:440px; }
- .login-story { padding:25px; }
- .login-story h2 { font-size:27px; margin:8px 0 10px; }
- .login-story p { font-size:11px; max-width:none; }
- .story-bottom { display:none; }
- .login-form-panel { padding:28px 23px; }
- .home-heading h1 { font-size:26px; }
- .home-actions { grid-template-columns:1fr; gap:12px; }
- .home-actions button { min-height:136px; padding:20px 46px 20px 80px; justify-content:center; }
- .action-icon { position:absolute; left:20px; top:28px; margin:0; width:41px; height:41px; }
- .action-title { font-size:15px; }
- .action-description { font-size:11px; }
- .action-arrow { top:43px; right:17px; }
- .grade-resumo { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
- .indicador { padding:14px; }
- .indicador strong { font-size:27px; }
- dialog { padding:24px; border-radius:18px; }
- th,td { padding:12px 9px; }
- .topo strong { font-size:11px; }
+ body { padding:0 16px; } .container { padding-top:20px; } .app-header { margin-bottom:24px; padding-bottom:18px; }
+ .brand-symbol { width:39px; height:39px; border-radius:11px; } .brand-name { font-size:19px; } .brand-tagline { font-size:10px; } .header-label { display:none; }
+ .card { padding:22px; border-radius:16px; } h1 { font-size:24px; } h2 { font-size:19px; }
+ #tela-login { grid-template-columns:1fr; margin:22px auto; max-width:440px; } .login-story { padding:25px; } .login-story h2 { font-size:27px; margin:8px 0 10px; } .login-story p { font-size:11px; max-width:none; } .story-bottom { display:none; } .login-form-panel { padding:28px 23px; }
+ .home-heading h1 { font-size:26px; } .home-actions { grid-template-columns:1fr; gap:12px; } .home-actions button { min-height:136px; padding:20px 46px 20px 80px; justify-content:center; }
+ .action-icon { position:absolute; left:20px; top:28px; margin:0; width:41px; height:41px; } .action-title { font-size:15px; } .action-arrow { top:43px; right:17px; }
+ .grade-resumo { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .indicador { padding:14px; } .indicador strong { font-size:27px; }
+ dialog { padding:24px; border-radius:18px; } th,td { padding:12px 9px; } .topo strong { font-size:12px; }
+ .collapsible>summary { padding:18px 20px; } .panel-content { padding:0 20px 20px; } .manual-panel>summary { padding:14px 16px; }
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none !important; animation:none !important; scroll-behavior:auto !important; } }
 
@@ -197,18 +163,13 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
 
 <body>
   <div class="container">
-    <header class="app-header">
-      <div class="brand"><div class="brand-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4"/><path d="M7 8v8m3-8v8m4-8v8m3-8v8"/></svg></div><div><div class="brand-name">INVENTARIEI</div><div class="brand-tagline">Seu estoque, em ordem.</div></div></div>
-      <span class="header-label">Contagem e conferência de estoque</span>
-    </header>
-
+<header class="app-header"><div class="brand"><div class="brand-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4"/><path d="M7 8v8m3-8v8m4-8v8m3-8v8"/></svg></div><div><div class="brand-name">INVENTARIEI</div><div class="brand-tagline">Seu estoque, em ordem.</div></div></div><span class="header-label">Contagem e conferência de estoque</span></header>
 
     <div id="mensagem-global" role="alert" aria-live="polite"></div>
 
     <!-- LOGIN -->
     <section id="tela-login" class="card">
-      <aside class="login-story"><div><div class="eyebrow">Clareza em cada leitura</div><h2>Conte com<br>mais controle.</h2><p>Cadastre produtos, conte com a câmera do celular e simplifique sua rotina de conferência.</p></div><div class="story-bottom"><div class="barcode-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span>Leia. Confira. Inventariei.</span></div></aside>
-      <div class="login-form-panel"><div class="eyebrow">Bem-vindo ao INVENTARIEI</div><h1>Acesse sua conta</h1><p class="subtitulo">Entre para organizar sua próxima contagem.</p>
+      <aside class="login-story"><div><div class="eyebrow">Clareza em cada leitura</div><h2>Conte com<br>mais controle.</h2><p>Cadastre produtos, conte com a câmera do celular e simplifique sua rotina de conferência.</p></div><div class="story-bottom"><div class="barcode-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span>Leia. Confira. Inventariei.</span></div></aside><div class="login-form-panel"><div class="eyebrow">Bem-vindo ao INVENTARIEI</div><h1>Acesse sua conta</h1><p class="subtitulo">Entre para organizar sua próxima contagem.</p>
 
       <form id="form-login">
         <label for="login-email">E-mail</label>
@@ -229,33 +190,28 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
           required
         />
 
+        <label class="remember-label" for="lembrar-login"><input id="lembrar-login" type="checkbox" /> Lembrar login neste dispositivo</label>
+        <p class="remember-help">Use somente em um dispositivo de confiança. Sua senha não será armazenada pelo aplicativo.</p>
         <button id="botao-login" type="submit">
           Entrar
         </button>
       </form>
 
-      <div id="mensagem-login" role="status" aria-live="polite"></div>
-      <p class="login-note">Sua rotina de inventário começa aqui.</p></div>
+      <div id="mensagem-login" role="status" aria-live="polite"></div><p class="login-note">Sua rotina de inventário começa aqui.</p></div>
     </section>
 
     <!-- MENU -->
     <section id="tela-menu" class="hidden">
       <div class="topo">
-        <strong id="usuario-logado"></strong>
+        <div><span class="user-caption">Conta conectada</span><strong id="usuario-logado">Usuário</strong></div>
 
         <button id="botao-sair" type="button" class="secondary">
           Sair
         </button>
       </div>
 
-      <div class="home-heading"><div class="eyebrow">Seu espaço de trabalho</div><h1>Tudo pronto para conferir?</h1><p class="subtitulo">Cadastre, conte e acompanhe. Seu inventário organizado em um só lugar.</p></div>
-      <div class="home-actions">
-<button id="botao-ir-cadastro" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9M7 5.8l9 5"/></svg></span><span class="action-title">Produtos</span><span class="action-description">Cadastre códigos e organize as informações dos seus itens.</span><span class="action-arrow" aria-hidden="true">↗</span></button>
-<button id="botao-ir-contagem" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4"/><path d="M7 8v8m3-8v8m4-8v8m3-8v8"/></svg></span><span class="action-title">Nova contagem</span><span class="action-description">Inicie ou continue a conferência com a câmera do celular.</span><span class="action-arrow" aria-hidden="true">↗</span></button>
-<button id="botao-ir-relatorios" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 16v-4m5 4V7m5 9v-7"/></svg></span><span class="action-title">Relatórios</span><span class="action-description">Confira divergências e exporte os resultados das contagens.</span><span class="action-arrow" aria-hidden="true">↗</span></button>
-</div><div class="home-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-9v.01"/></svg><span>Um fluxo simples: cadastre os produtos, realize a contagem e confira o relatório de divergências.</span></div>
+<div class="home-heading"><div class="eyebrow">Seu espaço de trabalho</div><h1>Tudo pronto para conferir?</h1><p class="subtitulo">Cadastre, conte e acompanhe. Seu inventário organizado em um só lugar.</p></div><div class="home-actions"><button id="botao-ir-cadastro" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9M7 5.8l9 5"/></svg></span><span class="action-title">Produtos</span><span class="action-description">Cadastre códigos e organize as informações dos seus itens.</span><span class="action-arrow" aria-hidden="true">↗</span></button><button id="botao-ir-contagem" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4"/><path d="M7 8v8m3-8v8m4-8v8m3-8v8"/></svg></span><span class="action-title">Nova contagem</span><span class="action-description">Inicie ou continue a conferência com a câmera do celular.</span><span class="action-arrow" aria-hidden="true">↗</span></button><button id="botao-ir-relatorios" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 16v-4m5 4V7m5 9v-7"/></svg></span><span class="action-title">Relatórios</span><span class="action-description">Confira divergências e exporte os resultados das contagens.</span><span class="action-arrow" aria-hidden="true">↗</span></button></div><div class="home-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-9v.01"/></svg><span>Um fluxo simples: cadastre os produtos, realize a contagem e confira o relatório de divergências.</span></div>
     </section>
-
     <!-- CADASTRO -->
     <section id="tela-cadastro" class="hidden">
       <div class="topo">
@@ -333,100 +289,42 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
 
     <!-- CONTAGEM -->
     <section id="tela-contagem" class="hidden">
-      <div class="topo">
-        <strong>Contagem</strong>
-
-        <button
-          id="botao-voltar-contagem"
-          type="button"
-          class="secondary"
-        >
-          Voltar
-        </button>
-      </div>
-
-      <div class="card">
-        <div class="eyebrow">Inventário físico</div><h2 id="titulo-contagem">Nova contagem</h2>
-
-        <form id="form-contagem">
-          <label for="contagem-nome">Nome da contagem</label>
-          <input
-            id="contagem-nome"
-            type="text"
-            placeholder="Contagem semanal"
-            required
-          />
-
-          <button id="botao-iniciar-contagem" type="submit">
-            Iniciar contagem
-          </button>
-        </form>
-
-        <div id="mensagem-contagem" role="status" aria-live="polite"></div>
-      </div>
-
-      <div id="painel-leitura" class="hidden">
-        <div class="card">
-          <div class="eyebrow">Leitura pela câmera</div><h2>Escaneie. Confira. Continue.</h2>
-
-          <p class="ajuda">
-            Leia o código, confira a quantidade (inicia em 1 unidade)
-            e confirme para gravar. Você pode informar 24 unidades,
-            por exemplo, sem escanear 24 vezes. Após confirmar, a câmera
-            é liberada automaticamente para o próximo código.
-          </p>
-
-          <button id="botao-escanear-contagem" type="button">
-            Abrir câmera
-          </button>
-
-
-          <button
-            id="botao-parar-camera"
-            type="button"
-            class="secondary hidden"
-          >
-            Parar câmera
-          </button>
-
-          <div id="reader-contagem" class="reader"></div>
-
-          <form id="form-manual">
-            <label for="codigo-manual">Código manual</label>
-            <input
-              id="codigo-manual"
-              type="text"
-              placeholder="Digite o código, se necessário"
-              autocomplete="off"
-              required
-            />
-
-            <button
-              id="botao-registrar-manual"
-              type="submit"
-              class="secondary"
-            >
-              Informar código e quantidade
-            </button>
+      <div class="topo"><strong>Contagem</strong><button id="botao-voltar-contagem" type="button" class="secondary">Voltar</button></div>
+      <details id="card-contagem" class="card collapsible" open>
+        <summary><div><div class="eyebrow">Inventário físico</div><h2 id="titulo-contagem">Nova contagem</h2><span id="status-card-contagem" class="summary-caption">Defina um nome para começar.</span></div></summary>
+        <div class="panel-content">
+          <form id="form-contagem">
+            <label for="contagem-nome">Nome da contagem</label>
+            <input id="contagem-nome" type="text" placeholder="Contagem semanal" required />
+            <button id="botao-iniciar-contagem" type="submit">Iniciar contagem</button>
           </form>
-
+        </div>
+      </details>
+      <div id="mensagem-contagem" class="contagem-feedback" role="status" aria-live="polite"></div>
+      <div id="painel-leitura" class="hidden">
+        <div class="card" id="card-camera">
+          <div class="eyebrow">Leitura pela câmera</div><h2>Escaneie. Confira. Continue.</h2>
+          <p class="ajuda">Leia o código e informe a quantidade do lote. Após confirmar, a câmera é liberada automaticamente.</p>
+          <button id="botao-escanear-contagem" type="button">Abrir câmera</button>
+          <button id="botao-parar-camera" type="button" class="secondary hidden">Parar câmera</button>
+          <div id="reader-contagem" class="reader" tabindex="-1" role="region" aria-label="Área de leitura do código de barras"></div>
           <div id="resultado-leitura" role="status" aria-live="polite"></div>
+          <details id="card-codigo-manual" class="collapsible manual-panel">
+            <summary><span>Código manual<span class="summary-caption">Abra se preferir digitar o código.</span></span></summary>
+            <div class="panel-content">
+              <form id="form-manual">
+                <label for="codigo-manual">Código do produto</label>
+                <input id="codigo-manual" type="text" placeholder="Digite o código" autocomplete="off" required />
+                <button id="botao-registrar-manual" type="submit" class="secondary">Informar código e quantidade</button>
+              </form>
+            </div>
+          </details>
         </div>
-
-        <div class="card">
-          <div class="eyebrow">Progresso da contagem</div><h2>Itens conferidos</h2>
-
-          <div id="resumo-contagem" class="resumo"></div>
-          <div id="lista-contagem"></div>
-
-          <button
-            id="botao-finalizar-contagem"
-            type="button"
-            class="danger"
-          >
-            Finalizar contagem
-          </button>
-        </div>
+        <details id="card-itens-conferidos" class="card collapsible">
+          <summary><div><h2>Itens conferidos</h2><span id="resumo-itens-compacto" class="summary-caption">Nenhuma unidade conferida.</span></div></summary>
+          <div class="panel-content"><div id="resumo-contagem" class="resumo"></div><div id="lista-contagem"></div></div>
+        </details>
+        <div class="contagem-actions"><button id="botao-finalizar-contagem" type="button" class="danger">Finalizar contagem</button></div>
       </div>
     </section>
 
@@ -655,21 +553,18 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
       }
 
       function vibrarDispositivo(padrao) {
-        try {
-          if (typeof navigator.vibrate === "function") navigator.vibrate(padrao);
-        } catch (erro) { console.debug("Vibração indisponível:", erro); }
+        try { if (typeof navigator.vibrate === "function") navigator.vibrate(padrao); }
+        catch (erro) { console.debug("Vibração indisponível:", erro); }
       }
       function tocarBipLeitura() {
         vibrarDispositivo(100);
-        void tocarSequenciaSonora([
-          { frequencia: 1450, atraso: 0, duracao: 0.14, volume: 0.40 }
-        ]);
+        void tocarSequenciaSonora([{ frequencia:1450, atraso:0, duracao:0.14, volume:0.40 }]);
       }
       function tocarSomConfirmacao() {
-        vibrarDispositivo([100, 70, 150]);
+        vibrarDispositivo([100,70,150]);
         void tocarSequenciaSonora([
-          { frequencia: 850, atraso: 0, duracao: 0.14, volume: 0.35 },
-          { frequencia: 1200, atraso: 0.18, duracao: 0.20, volume: 0.40 }
+          { frequencia:850, atraso:0, duracao:0.14, volume:0.35 },
+          { frequencia:1200, atraso:0.18, duracao:0.20, volume:0.40 }
         ]);
       }
 
@@ -726,12 +621,17 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
 
         if (ativa) {
           el("contagem-nome").value = contagemAtual.nome;
+          el("status-card-contagem").textContent = "Em andamento · Clique para ver os dados da contagem.";
+        } else {
+          el("card-contagem").open = true;
+          el("status-card-contagem").textContent = "Defina um nome para começar.";
         }
 
         atualizarControles();
       }
 
       async function pararCamera() {
+        clearTimeout(temporizadorCentralizarCamera);
         cancelarRetomadaAutomatica();
         if (abrindoCamera) {
           throw new Error(
@@ -883,6 +783,7 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
             "Câmera aberta. Posicione o código dentro da área de leitura.",
             "info"
           );
+          if (tipo === "contagem") centralizarCameraNaTela();
         } catch (erro) {
           console.error("Erro na câmera:", erro);
 
@@ -1002,6 +903,7 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
         );
 
         try {
+          configurarPreferenciaLogin(email);
           const { data, error } = await exigirConexao()
             .auth.signInWithPassword({
               email,
@@ -1018,7 +920,7 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
 
           usuarioAtual = data.user;
 
-          el("usuario-logado").textContent = data.user.email;
+          await carregarNomeUsuario(data.user);
           el("login-senha").value = "";
 
           limparMensagem(mensagem);
@@ -1283,6 +1185,10 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
           if (error) throw error;
 
           contagemAtual = data;
+          el("card-contagem").open = false;
+          el("card-codigo-manual").open = false;
+          el("card-itens-conferidos").open = false;
+          el("resumo-itens-compacto").textContent = "Nenhuma unidade conferida.";
 
           limparMensagem(el("resultado-leitura"));
           atualizarPainelContagem();
@@ -1316,7 +1222,6 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
 
         if (sucesso) {
           el("codigo-manual").value = "";
-          el("codigo-manual").focus();
         }
       });
 
@@ -1400,6 +1305,9 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
           vazio.textContent = "Nenhum item contado ainda.";
           lista.append(vazio);
         }
+
+        el("resumo-itens-compacto").textContent =
+          `${totalUnidades} unidade(s) · ${agrupados.size} código(s) · ${totalPendencias} unidade(s) pendente(s)`;
 
         el("resumo-contagem").textContent =
           `Unidades contadas: ${totalUnidades} | ` +
@@ -1521,7 +1429,15 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
 
           db = window.supabase.createClient(
             SUPABASE_URL,
-            SUPABASE_PUBLIC_KEY
+            SUPABASE_PUBLIC_KEY,
+            {
+              auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                storageKey: CHAVE_SESSAO,
+                storage: armazenamentoAuth
+              }
+            }
           );
 
           db.auth.onAuthStateChange((evento, sessao) => {
@@ -1529,8 +1445,11 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
             usuarioAtual = sessao?.user || null;
 
             if (usuarioAtual) {
-              el("usuario-logado").textContent =
-                usuarioAtual.email || "";
+              if (usuarioAnterior && usuarioAnterior !== usuarioAtual.id) {
+                limparNomeUsuario();
+                invalidarRelatorios();
+              }
+              agendarCarregamentoNome(usuarioAtual);
 
               // Renovar o token não deve tirar o usuário da tela atual.
               if (
@@ -1540,6 +1459,7 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
                 mostrarTela("menu");
               }
             } else if (evento === "SIGNED_OUT") {
+              limparNomeUsuario();
               invalidarRelatorios();
               leituraPendente = null;
               if (el("modal-produto").open) el("modal-produto").close();
@@ -1564,8 +1484,7 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
           if (data.session) {
             usuarioAtual = data.session.user;
 
-            el("usuario-logado").textContent =
-              usuarioAtual.email || "";
+            await carregarNomeUsuario(usuarioAtual);
 
             mostrarTela("menu");
             limparMensagem(el("mensagem-login"));
@@ -2063,6 +1982,8 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
           codigoBloqueadoAte = Date.now() + INTERVALO_MESMO_CODIGO_MS;
         }
         if (tipoScanner !== "contagem" || !scanner?.isScanning || !contagemAtual) return;
+        el("card-codigo-manual").open = false;
+        centralizarCameraNaTela();
         temporizadorProximaLeitura = setTimeout(() => {
           temporizadorProximaLeitura = null;
           if (tipoScanner === "contagem" && scanner?.isScanning && contagemAtual &&
@@ -2077,6 +1998,134 @@ td:not(:first-child) { font-variant-numeric:tabular-nums; }
 
       atualizarCampoAutor("cadastro");
       atualizarCampoAutor("modal");
+
+      let temporizadorCentralizarCamera = null;
+      function centralizarCameraNaTela() {
+        clearTimeout(temporizadorCentralizarCamera);
+        if (tipoScanner !== "contagem" || !scanner?.isScanning || !contagemAtual) return;
+        const ativo = document.activeElement;
+        if (ativo && typeof ativo.blur === "function" && ativo.matches?.("input,select,textarea")) ativo.blur();
+        temporizadorCentralizarCamera = setTimeout(() => {
+          temporizadorCentralizarCamera = null;
+          if (tipoScanner !== "contagem" || !scanner?.isScanning || !contagemAtual ||
+              leituraPendente || el("modal-leitura").open || el("modal-produto").open ||
+              telas.contagem.classList.contains("hidden")) return;
+          const camera = el("reader-contagem");
+          if (!camera.getClientRects().length) return;
+          camera.focus({ preventScroll: true });
+          const reduzir = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+          camera.scrollIntoView({ behavior: reduzir ? "auto" : "smooth", block: "center", inline: "nearest" });
+        }, 320);
+      }
+
+
+      // Preferência de sessão: tokens do Auth, nunca a senha do formulário.
+      const CHAVE_LEMBRAR = "inventariei.lembrar-login";
+      const CHAVE_EMAIL = "inventariei.email-lembrado";
+      const CHAVE_SESSAO = "inventariei.auth.v2";
+      const memoriaAuth = new Map();
+      function lerPreferencia(chave) {
+        try { return window.localStorage.getItem(chave); }
+        catch (_) { return null; }
+      }
+      function escreverPreferencia(chave, valor) {
+        try {
+          if (valor === null) window.localStorage.removeItem(chave);
+          else window.localStorage.setItem(chave, valor);
+          return true;
+        } catch (erro) {
+          console.warn("Armazenamento de preferências indisponível:", erro);
+          return false;
+        }
+      }
+      let lembrarSessao = lerPreferencia(CHAVE_LEMBRAR) === "true";
+      const armazenamentoAuth = {
+        getItem(chave) {
+          const modo = lembrarSessao ? "local" : "sessao";
+          try {
+            const storage = lembrarSessao ? window.localStorage : window.sessionStorage;
+            return storage.getItem(chave) ?? memoriaAuth.get(`${modo}:${chave}`) ?? null;
+          } catch (_) { return memoriaAuth.get(`${modo}:${chave}`) ?? null; }
+        },
+        setItem(chave, valor) {
+          const modo = lembrarSessao ? "local" : "sessao";
+          memoriaAuth.set(`${modo}:${chave}`, valor);
+          memoriaAuth.delete(`${lembrarSessao ? "sessao" : "local"}:${chave}`);
+          try {
+            const storage = lembrarSessao ? window.localStorage : window.sessionStorage;
+            const outro = lembrarSessao ? window.sessionStorage : window.localStorage;
+            storage.setItem(chave, valor);
+            outro.removeItem(chave);
+          } catch (erro) { console.warn("Sessão disponível somente em memória:", erro); }
+        },
+        removeItem(chave) {
+          memoriaAuth.delete(`local:${chave}`);
+          memoriaAuth.delete(`sessao:${chave}`);
+          try { window.localStorage.removeItem(chave); } catch (_) {}
+          try { window.sessionStorage.removeItem(chave); } catch (_) {}
+        }
+      };
+      function configurarPreferenciaLogin(email) {
+        lembrarSessao = el("lembrar-login").checked;
+        escreverPreferencia(CHAVE_LEMBRAR, String(lembrarSessao));
+        escreverPreferencia(CHAVE_EMAIL, lembrarSessao ? email : null);
+      }
+
+      let perfilNomeUsuarioId = null;
+      let consultaNomeEmAndamento = null;
+      let versaoNomePerfil = 0;
+      function limparNomeUsuario() {
+        versaoNomePerfil += 1;
+        perfilNomeUsuarioId = null;
+        consultaNomeEmAndamento = null;
+        el("usuario-logado").textContent = "Usuário";
+        el("usuario-logado").removeAttribute("title");
+      }
+      function nomeAlternativoUsuario(usuario) {
+        const metadados = usuario?.user_metadata || {};
+        for (const valor of [metadados.nome, metadados.full_name, metadados.name]) {
+          if (typeof valor === "string" && valor.trim()) return valor.trim();
+        }
+        return "Usuário";
+      }
+      async function carregarNomeUsuario(usuario) {
+        if (!usuario?.id || usuarioAtual?.id !== usuario.id) return;
+        if (perfilNomeUsuarioId === usuario.id) return;
+        if (consultaNomeEmAndamento?.id === usuario.id) return consultaNomeEmAndamento.promessa;
+        const versao = versaoNomePerfil;
+        el("usuario-logado").textContent = "Carregando perfil...";
+        const promessa = (async () => {
+          try {
+            const { data, error } = await exigirConexao().from("perfis")
+              .select("nome").eq("id", usuario.id).maybeSingle();
+            if (error) throw error;
+            if (usuarioAtual?.id !== usuario.id || versao !== versaoNomePerfil) return;
+            const nome = typeof data?.nome === "string" ? data.nome.trim() : "";
+            el("usuario-logado").textContent = nome || nomeAlternativoUsuario(usuario);
+            if (!nome) el("usuario-logado").title = "Nome não encontrado em perfis.nome.";
+            else el("usuario-logado").removeAttribute("title");
+            perfilNomeUsuarioId = usuario.id;
+          } catch (erro) {
+            if (usuarioAtual?.id !== usuario.id || versao !== versaoNomePerfil) return;
+            console.warn("Não foi possível consultar perfis.nome:", erro);
+            el("usuario-logado").textContent = nomeAlternativoUsuario(usuario);
+            el("usuario-logado").title = "Não foi possível carregar o nome do perfil.";
+          } finally {
+            if (versao === versaoNomePerfil && consultaNomeEmAndamento?.id === usuario.id) {
+              consultaNomeEmAndamento = null;
+            }
+          }
+        })();
+        consultaNomeEmAndamento = { id: usuario.id, promessa };
+        return promessa;
+      }
+      function agendarCarregamentoNome(usuario) {
+        // Não consulta o banco dentro do callback síncrono de autenticação.
+        setTimeout(() => { void carregarNomeUsuario(usuario); }, 0);
+      }
+
+      el("lembrar-login").checked = lembrarSessao;
+      if (lembrarSessao) el("login-email").value = lerPreferencia(CHAVE_EMAIL) || "";
       void inicializar();
     })();
   </script>
