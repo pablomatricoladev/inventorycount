@@ -4,226 +4,211 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Contagem de Estoque</title>
+  <title>INVENTARIEI — Contagem de estoque</title>
+  <meta name="theme-color" content="#1B4B8F" />
+  <meta name="description" content="INVENTARIEI: contagem e conferência de estoque pelo celular." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
 
-    body {
-      background: #f4f6f8;
-      color: #222;
-      min-height: 100vh;
-      padding: 16px;
-    }
+:root {
+  --brand-primary: #1B4B8F;
+  --brand-accent: #16A34A;
+  --brand-gray: #6B7280;
+  --brand-white: #FFFFFF;
+  --brand-black: #000000;
+  --font-family: "Poppins", sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --page-bg:#F5F7FB;
+  --text-primary:#172A46;
+  --border:#E2E8F1;
+  --primary-soft:#EDF3FC;
+  --primary-hover:#153D75;
+  --accent-soft:#F0FDF4;
+  --accent-hover:#15803D;
+  --shadow:0 8px 30px rgba(27,75,143,.045);
+  --radius:18px;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  font-family:var(--font-family); font-weight:var(--font-weight-regular);
+  background:var(--page-bg); color:var(--text-primary); min-height:100vh;
+  padding:0 24px; font-size:14px; line-height:1.65; -webkit-font-smoothing:antialiased;
+}
+input,select,button { font:inherit; }
+.container { max-width:1080px; margin:auto; padding:28px 0 16px; }
+.brand-name { color:var(--brand-primary); font-weight:var(--font-weight-bold); letter-spacing:-0.02em; font-size:22px; line-height:1.2; }
+.brand-tagline { color:var(--brand-gray); font-weight:var(--font-weight-regular); font-size:11px; margin-top:4px; }
+.app-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:32px; padding-bottom:23px; border-bottom:1px solid var(--border); }
+.brand { display:flex; gap:12px; align-items:center; }
+.brand-symbol { display:grid; place-items:center; height:45px; width:45px; border-radius:13px; background:var(--brand-primary); color:var(--brand-white); position:relative; flex-shrink:0; }
+.brand-symbol::after { content:""; width:9px; height:9px; background:var(--brand-accent); border:2px solid var(--brand-white); border-radius:50%; position:absolute; right:-2px; bottom:-1px; }
+.brand-symbol svg { width:25px; height:25px; }
+.header-label { padding:7px 12px; border:1px solid var(--border); color:var(--brand-gray); background:var(--brand-white); font-size:11px; border-radius:99px; }
+h1,h2,h3 { color:var(--text-primary); font-weight:var(--font-weight-semibold); line-height:1.3; letter-spacing:-.035em; }
+h1 { font-size:28px; margin-bottom:10px; }
+h2 { font-size:20px; margin-bottom:15px; }
+.card { background:var(--brand-white); border:1px solid var(--border); border-radius:var(--radius); padding:30px; margin-bottom:20px; box-shadow:var(--shadow); }
+.eyebrow { text-transform:uppercase; letter-spacing:1.6px; font-size:10px; font-weight:var(--font-weight-semibold); color:var(--brand-primary); margin-bottom:9px; }
+.subtitulo { color:var(--brand-gray); font-size:13px; line-height:1.85; margin-bottom:24px; max-width:620px; }
+label { display:block; margin:18px 0 7px; color:#44536B; font-size:12px; font-weight:var(--font-weight-medium); }
+input,select { width:100%; min-height:49px; padding:12px 14px; border:1px solid #D7DFEB; border-radius:10px; background:#FCFDFF; color:var(--text-primary); font-size:16px; transition:border-color .16s,box-shadow .16s; }
+input::placeholder { color:#8B96A7; font-size:13px; opacity:1; }
+input:hover,select:hover { border-color:#AEBFD8; }
+input:focus,select:focus { outline:none; border-color:var(--brand-primary); box-shadow:0 0 0 3px #1B4B8F14; background:var(--brand-white); }
+input[readonly] { color:var(--brand-gray); background:#F1F4F8; }
+input:disabled,select:disabled { background:#F1F4F8; opacity:.65; cursor:not-allowed; }
+button { width:100%; min-height:48px; padding:12px 18px; margin-top:16px; border:1px solid transparent; border-radius:10px; color:var(--brand-white); background:var(--brand-primary); font-size:13px; font-weight:var(--font-weight-semibold); line-height:1.55; cursor:pointer; touch-action:manipulation; transition:background .16s,transform .16s,box-shadow .16s; }
+button:hover:not(:disabled) { background:var(--primary-hover); box-shadow:0 5px 16px #1B4B8F1A; }
+button:active:not(:disabled) { transform:translateY(1px); }
+button:focus-visible { outline:3px solid #7B9DCB; outline-offset:3px; }
+button.secondary { background:#EFF3F9; color:var(--brand-primary); border-color:#DFE7F1; }
+button.secondary:hover:not(:disabled) { background:#E3EBF6; box-shadow:none; }
+button.success,#botao-salvar-produto,#salvar-produto-modal { background:var(--brand-accent); color:var(--brand-white); }
+button.success:hover:not(:disabled),#botao-salvar-produto:hover:not(:disabled),#salvar-produto-modal:hover:not(:disabled) { background:var(--accent-hover); }
+button.danger { background:#FFF2F1; color:#A73939; border-color:#F2DAD7; }
+button.danger:hover:not(:disabled) { background:#FCE5E3; box-shadow:none; }
+button:disabled { opacity:.48; cursor:not-allowed; box-shadow:none; }
+.hidden { display:none !important; }
+.topo { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-bottom:22px; }
+.topo strong { font-weight:var(--font-weight-medium); font-size:13px; color:var(--brand-gray); overflow-wrap:anywhere; }
+.topo button { margin:0; min-height:36px; width:auto; padding:7px 13px; font-size:11px; flex-shrink:0; }
+.mensagem { margin-top:14px; padding:12px 14px; border:1px solid transparent; border-radius:10px; font-size:12px; line-height:1.75; white-space:pre-line; overflow-wrap:anywhere; }
+.sucesso { background:#F0FDF4; color:#166534; border-color:#D3EEDD; }
+.erro { background:#FFF1F0; color:#9F3535; border-color:#F3D9D6; }
+.aviso { background:#FFFAEB; color:#856322; border-color:#F2E6C8; }
+.info { background:var(--primary-soft); color:var(--brand-primary); border-color:#DAE6F7; }
+#mensagem-global:not(:empty) { margin-bottom:20px; }
+.ajuda { margin-top:12px; color:var(--brand-gray); font-size:11px; line-height:1.85; }
+.reader { width:100%; overflow:hidden; border-radius:14px; background:#13243D; margin-top:18px; }
+.reader:empty { display:none; }
+.reader video { width:100% !important; display:block; }
+.resumo { background:var(--primary-soft); color:var(--brand-primary); border:1px solid #DAE6F7; padding:14px 16px; border-radius:11px; margin-bottom:12px; font-size:12px; line-height:1.9; }
+.lista-item { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:16px 3px; border-bottom:1px solid #EDF0F5; font-size:13px; }
+.lista-item:last-child { border-bottom:0; }
+.lista-item span:first-child { overflow-wrap:anywhere; }
+.lista-item small { color:var(--brand-gray); font-size:11px; }
+.contador { background:var(--primary-soft); color:var(--brand-primary); min-width:42px; height:36px; border-radius:9px; display:grid; place-items:center; font-weight:var(--font-weight-semibold); font-size:17px; padding:0 8px; flex-shrink:0; }
+dialog { width:min(94vw,520px); max-height:90vh; max-height:90dvh; overflow:auto; margin:auto; padding:30px; border:1px solid var(--border); border-radius:21px; background:var(--brand-white); color:var(--text-primary); box-shadow:0 24px 100px #102E5938; }
+dialog::backdrop { background:#102340B3; backdrop-filter:blur(4px); }
+dialog h2 { font-size:22px; }
+dialog p { margin-top:10px; line-height:1.75; }
+.linha-acoes { display:flex; gap:10px; align-items:stretch; }
+.linha-acoes button { flex:1; }
+#leitura-descricao { font-weight:var(--font-weight-semibold); }
+#leitura-codigo { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:12px; background:#F3F6FA; padding:9px 11px; border-radius:7px; }
+#leitura-quantidade { height:82px; text-align:center; font-weight:var(--font-weight-semibold); font-size:36px; color:var(--brand-primary); }
+.grade-resumo { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:22px 0; }
+.indicador { background:#F8FAFD; border:1px solid var(--border); padding:18px; border-radius:13px; }
+.indicador small { display:block; min-height:36px; font-size:10px; color:var(--brand-gray); margin-bottom:8px; line-height:1.65; }
+.indicador strong { color:var(--brand-primary); font-weight:var(--font-weight-semibold); font-size:30px; letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+#relatorio-corretos { color:var(--brand-accent); }
+#relatorio-faltantes { color:#BA4D42; }
+#relatorio-excedentes,#relatorio-desconhecidos { color:#997425; }
+.tabela-container { width:100%; overflow-x:auto; margin-top:20px; border:1px solid var(--border); border-radius:12px; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th,td { text-align:left; padding:14px 12px; border-bottom:1px solid #E9EDF4; vertical-align:top; }
+th { background:#F4F7FC; color:#65738A; font-size:10px; font-weight:var(--font-weight-semibold); letter-spacing:.4px; white-space:nowrap; }
+tr:last-child td { border-bottom:0; }
+tbody tr:hover { background:#FAFCFF; }
+td small { display:block; font-size:10px; color:var(--brand-gray); margin-top:5px; }
+td:not(:first-child) { font-variant-numeric:tabular-nums; }
+.metadados-relatorio { white-space:pre-line; overflow-wrap:anywhere; font-size:11px; color:var(--brand-gray); line-height:1.9; }
+.app-footer { text-align:center; padding:28px 0 10px; color:var(--brand-gray); font-size:10px; }
+#tela-cadastro,#tela-contagem { max-width:760px; margin:auto; }
+#form-manual { border-top:1px solid var(--border); padding-top:7px; margin-top:20px; }
+#botao-finalizar-contagem { margin-top:24px; }
+/* Login */
+#tela-login { display:grid; grid-template-columns:.95fr 1fr; max-width:940px; min-height:510px; padding:0; margin:45px auto; overflow:hidden; }
+.login-story { background:var(--brand-primary); padding:44px 35px; color:var(--brand-white); position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; }
+.login-story::after { content:""; position:absolute; height:350px; width:350px; border:1px solid #FFFFFF16; border-radius:50%; right:-160px; bottom:-85px; box-shadow:0 0 0 55px #FFFFFF05,0 0 0 110px #FFFFFF03; pointer-events:none; }
+.login-story .eyebrow { color:#BBD1F1; }
+.login-story h2 { color:var(--brand-white); font-size:35px; line-height:1.25; margin:18px 0; letter-spacing:-.04em; }
+.login-story p { color:#D8E4F5; font-size:12px; line-height:1.95; max-width:280px; }
+.story-bottom { margin-top:42px; position:relative; z-index:1; }
+.barcode-mark { display:flex; gap:4px; align-items:center; height:40px; margin-bottom:16px; }
+.barcode-mark i { height:100%; width:3px; border-radius:1px; background:#CFDEF4; }
+.barcode-mark i:nth-child(3n) { width:7px; }
+.barcode-mark i:nth-child(4n) { height:72%; }
+.story-bottom span { font-size:9px; text-transform:uppercase; letter-spacing:1.5px; color:#D0DFF4; }
+.login-form-panel { padding:44px 37px; align-self:center; }
+.login-form-panel h1 { font-size:27px; }
+.login-form-panel .subtitulo { font-size:12px; margin-bottom:24px; }
+#botao-login { margin-top:24px; }
+.login-note { text-align:center; color:var(--brand-gray); font-size:10px; margin-top:22px; }
+/* Menu principal */
+.home-heading { margin:8px 0 28px; }
+.home-heading h1 { font-size:32px; }
+.home-heading .subtitulo { margin-bottom:0; }
+.home-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+.home-actions button { position:relative; display:flex; flex-direction:column; align-items:flex-start; text-align:left; min-height:220px; padding:25px; margin:0; background:var(--brand-white); color:var(--text-primary); border:1px solid var(--border); border-radius:17px; box-shadow:var(--shadow); }
+.home-actions button:hover:not(:disabled) { background:var(--brand-white); border-color:#AEC4E2; box-shadow:0 12px 28px #1B4B8F0E; transform:translateY(-3px); }
+.action-icon { display:grid; place-items:center; width:44px; height:44px; margin-bottom:22px; background:var(--primary-soft); border-radius:12px; color:var(--brand-primary); }
+.action-icon svg { width:23px; height:23px; }
+#botao-ir-contagem .action-icon { color:var(--brand-accent); background:var(--accent-soft); }
+.action-title { font-size:16px; font-weight:var(--font-weight-semibold); letter-spacing:-.02em; }
+.action-description { color:var(--brand-gray); font-size:11px; font-weight:var(--font-weight-regular); line-height:1.85; margin-top:8px; }
+.action-arrow { position:absolute; right:21px; top:29px; color:#9AAFCB; font-size:21px; font-weight:var(--font-weight-regular); }
+.home-tip { display:flex; align-items:flex-start; gap:12px; background:#EDF3FC; color:#526B8D; border:1px solid #DEE8F6; padding:18px 20px; border-radius:12px; margin-top:24px; font-size:11px; line-height:1.85; }
+.home-tip svg { height:19px; width:19px; flex-shrink:0; margin-top:1px; }
+@media(min-width:820px) { #form-produto { max-width:620px; margin:auto; } }
+@media(max-width:720px) {
+ body { padding:0 16px; }
+ .container { padding-top:20px; }
+ .app-header { margin-bottom:24px; padding-bottom:18px; }
+ .brand-symbol { width:39px; height:39px; border-radius:11px; }
+ .brand-name { font-size:19px; }
+ .brand-tagline { font-size:10px; }
+ .header-label { display:none; }
+ .card { padding:22px; border-radius:16px; }
+ h1 { font-size:24px; } h2 { font-size:19px; }
+ #tela-login { grid-template-columns:1fr; margin:22px auto; max-width:440px; }
+ .login-story { padding:25px; }
+ .login-story h2 { font-size:27px; margin:8px 0 10px; }
+ .login-story p { font-size:11px; max-width:none; }
+ .story-bottom { display:none; }
+ .login-form-panel { padding:28px 23px; }
+ .home-heading h1 { font-size:26px; }
+ .home-actions { grid-template-columns:1fr; gap:12px; }
+ .home-actions button { min-height:136px; padding:20px 46px 20px 80px; justify-content:center; }
+ .action-icon { position:absolute; left:20px; top:28px; margin:0; width:41px; height:41px; }
+ .action-title { font-size:15px; }
+ .action-description { font-size:11px; }
+ .action-arrow { top:43px; right:17px; }
+ .grade-resumo { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+ .indicador { padding:14px; }
+ .indicador strong { font-size:27px; }
+ dialog { padding:24px; border-radius:18px; }
+ th,td { padding:12px 9px; }
+ .topo strong { font-size:11px; }
+}
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none !important; animation:none !important; scroll-behavior:auto !important; } }
 
-    .container {
-      max-width: 540px;
-      margin: 0 auto;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
-      margin-bottom: 16px;
-    }
-
-    h1 {
-      font-size: 22px;
-      margin-bottom: 16px;
-    }
-
-    h2 {
-      font-size: 18px;
-      margin-bottom: 12px;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      font-weight: bold;
-      margin: 12px 0 6px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-
-    input:focus {
-      border-color: #2563eb;
-      outline: 2px solid #dbeafe;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 14px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      background: #2563eb;
-      color: #fff;
-    }
-
-    button.secondary {
-      background: #6b7280;
-    }
-
-    button.danger {
-      background: #dc2626;
-    }
-
-    button.success {
-      background: #15803d;
-    }
-
-    button:disabled {
-      opacity: .6;
-      cursor: not-allowed;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .mensagem {
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 14px;
-      line-height: 1.5;
-      white-space: pre-line;
-      overflow-wrap: anywhere;
-    }
-
-    .sucesso {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .erro {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .aviso {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .info {
-      background: #dbeafe;
-      color: #1e40af;
-    }
-
-    .reader {
-      width: 100%;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-top: 12px;
-    }
-
-    .reader video {
-      width: 100% !important;
-    }
-
-    .lista-item {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-    }
-
-    .lista-item span:first-child {
-      overflow-wrap: anywhere;
-    }
-
-    .contador {
-      font-weight: bold;
-      font-size: 18px;
-      color: #2563eb;
-      flex-shrink: 0;
-    }
-
-    .topo {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .topo strong {
-      overflow-wrap: anywhere;
-    }
-
-    .topo button {
-      width: auto;
-      padding: 8px 14px;
-      margin: 0;
-      font-size: 13px;
-      flex-shrink: 0;
-    }
-
-    .ajuda {
-      color: #64748b;
-      font-size: 13px;
-      line-height: 1.5;
-      margin-top: 10px;
-    }
-
-    .resumo {
-      background: #eff6ff;
-      color: #1e40af;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      line-height: 1.5;
-    }
-
-    select { width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; font-size:16px; background:#fff; }
-    dialog { width:min(94vw,520px); max-height:90dvh; overflow:auto; border:0; border-radius:14px; padding:22px; margin:auto; box-shadow:0 12px 60px #0005; }
-    dialog::backdrop { background:#0f172a99; }
-    dialog p { line-height:1.5; margin-top:10px; }
-    .linha-acoes { display:flex; gap:10px; }
-    .grade-resumo { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:16px 0; }
-    .indicador { background:#eff6ff; padding:12px; border-radius:8px; }
-    .indicador small { display:block; font-size:12px; color:#475569; margin-bottom:6px; }
-    .indicador strong { font-size:23px; }
-    .tabela-container { width:100%; overflow-x:auto; margin-top:14px; }
-    table { width:100%; border-collapse:collapse; font-size:13px; }
-    th,td { text-align:left; padding:10px 7px; border-bottom:1px solid #e2e8f0; vertical-align:top; }
-    th { background:#f8fafc; white-space:nowrap; }
-    td small { display:block; color:#64748b; margin-top:4px; }
-    .metadados-relatorio { white-space:pre-line; overflow-wrap:anywhere; font-size:13px; line-height:1.6; }
   </style>
 </head>
 
 <body>
   <div class="container">
+    <header class="app-header">
+      <div class="brand"><div class="brand-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4"/><path d="M7 8v8m3-8v8m4-8v8m3-8v8"/></svg></div><div><div class="brand-name">INVENTARIEI</div><div class="brand-tagline">Seu estoque, em ordem.</div></div></div>
+      <span class="header-label">Contagem e conferência de estoque</span>
+    </header>
+
 
     <div id="mensagem-global" role="alert" aria-live="polite"></div>
 
     <!-- LOGIN -->
     <section id="tela-login" class="card">
-      <h1>Contagem de Estoque</h1>
+      <aside class="login-story"><div><div class="eyebrow">Clareza em cada leitura</div><h2>Conte com<br>mais controle.</h2><p>Cadastre produtos, conte com a câmera do celular e simplifique sua rotina de conferência.</p></div><div class="story-bottom"><div class="barcode-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span>Leia. Confira. Inventariei.</span></div></aside>
+      <div class="login-form-panel"><div class="eyebrow">Bem-vindo ao INVENTARIEI</div><h1>Acesse sua conta</h1><p class="subtitulo">Entre para organizar sua próxima contagem.</p>
 
       <form id="form-login">
         <label for="login-email">E-mail</label>
@@ -250,6 +235,7 @@
       </form>
 
       <div id="mensagem-login" role="status" aria-live="polite"></div>
+      <p class="login-note">Sua rotina de inventário começa aqui.</p></div>
     </section>
 
     <!-- MENU -->
@@ -262,18 +248,12 @@
         </button>
       </div>
 
-      <div class="card">
-        <h1>Menu principal</h1>
-
-        <button id="botao-ir-cadastro" type="button">
-          Cadastrar produto
-        </button>
-
-        <button id="botao-ir-contagem" type="button">
-          Iniciar / continuar contagem
-        </button>
-        <button id="botao-ir-relatorios" type="button">Relatórios de contagem</button>
-      </div>
+      <div class="home-heading"><div class="eyebrow">Seu espaço de trabalho</div><h1>Tudo pronto para conferir?</h1><p class="subtitulo">Cadastre, conte e acompanhe. Seu inventário organizado em um só lugar.</p></div>
+      <div class="home-actions">
+<button id="botao-ir-cadastro" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9M7 5.8l9 5"/></svg></span><span class="action-title">Produtos</span><span class="action-description">Cadastre códigos e organize as informações dos seus itens.</span><span class="action-arrow" aria-hidden="true">↗</span></button>
+<button id="botao-ir-contagem" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4"/><path d="M7 8v8m3-8v8m4-8v8m3-8v8"/></svg></span><span class="action-title">Nova contagem</span><span class="action-description">Inicie ou continue a conferência com a câmera do celular.</span><span class="action-arrow" aria-hidden="true">↗</span></button>
+<button id="botao-ir-relatorios" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 16v-4m5 4V7m5 9v-7"/></svg></span><span class="action-title">Relatórios</span><span class="action-description">Confira divergências e exporte os resultados das contagens.</span><span class="action-arrow" aria-hidden="true">↗</span></button>
+</div><div class="home-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-9v.01"/></svg><span>Um fluxo simples: cadastre os produtos, realize a contagem e confira o relatório de divergências.</span></div>
     </section>
 
     <!-- CADASTRO -->
@@ -291,7 +271,7 @@
       </div>
 
       <div class="card">
-        <h2>Novo produto</h2>
+        <div class="eyebrow">Catálogo de produtos</div><h2>Cadastrar produto</h2><p class="subtitulo">Leia o código de barras e complete as informações do item.</p>
 
         <form id="form-produto">
           <label for="cadastro-codigo">Código de barras</label>
@@ -366,7 +346,7 @@
       </div>
 
       <div class="card">
-        <h2 id="titulo-contagem">Nova contagem</h2>
+        <div class="eyebrow">Inventário físico</div><h2 id="titulo-contagem">Nova contagem</h2>
 
         <form id="form-contagem">
           <label for="contagem-nome">Nome da contagem</label>
@@ -387,7 +367,7 @@
 
       <div id="painel-leitura" class="hidden">
         <div class="card">
-          <h2>Leitura por código de barras</h2>
+          <div class="eyebrow">Leitura pela câmera</div><h2>Escaneie. Confira. Continue.</h2>
 
           <p class="ajuda">
             Leia o código, confira a quantidade (inicia em 1 unidade)
@@ -434,7 +414,7 @@
         </div>
 
         <div class="card">
-          <h2>Itens contados</h2>
+          <div class="eyebrow">Progresso da contagem</div><h2>Itens conferidos</h2>
 
           <div id="resumo-contagem" class="resumo"></div>
           <div id="lista-contagem"></div>
@@ -491,7 +471,7 @@
     <section id="tela-relatorios" class="hidden">
       <div class="topo"><strong>Relatórios</strong><button id="botao-voltar-relatorios" class="secondary" type="button">Voltar</button></div>
       <div class="card">
-        <h2>Contagens finalizadas</h2>
+        <div class="eyebrow">Resultados e divergências</div><h2>Histórico de contagens</h2>
         <label for="relatorio-contagem">Contagem</label><select id="relatorio-contagem"><option value="">Selecione</option></select>
         <button id="botao-atualizar-relatorios" type="button" class="secondary">Atualizar histórico</button>
         <div id="mensagem-relatorios" role="status" aria-live="polite"></div>
@@ -519,6 +499,7 @@
         </div>
       </div>
     </section>
+    <footer class="app-footer">INVENTARIEI · Seu estoque, em ordem.</footer>
   </div>
 
   <script>
@@ -675,24 +656,15 @@
 
       function vibrarDispositivo(padrao) {
         try {
-          if (typeof navigator.vibrate === "function") {
-            navigator.vibrate(padrao);
-          }
-        } catch (erro) {
-          // A indisponibilidade da vibração não deve afetar o sistema.
-          console.debug("Vibração indisponível:", erro);
-        }
+          if (typeof navigator.vibrate === "function") navigator.vibrate(padrao);
+        } catch (erro) { console.debug("Vibração indisponível:", erro); }
       }
-
-      // Código reconhecido pela câmera: bip curto e uma vibração.
       function tocarBipLeitura() {
         vibrarDispositivo(100);
         void tocarSequenciaSonora([
           { frequencia: 1450, atraso: 0, duracao: 0.14, volume: 0.40 }
         ]);
       }
-
-      // Quantidade salva: dois tons ascendentes e duas vibrações.
       function tocarSomConfirmacao() {
         vibrarDispositivo([100, 70, 150]);
         void tocarSequenciaSonora([
