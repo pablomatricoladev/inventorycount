@@ -1,0 +1,46 @@
+INVENTARIEI — NAVEGAÇÃO 1a
+
+CONTEÚDO
+index.html — aplicação completa com a navegação integrada.
+navegacao.css — estilos da navegação (carregados após o CSS da aplicação).
+assets/simbolo.jpg — símbolo fornecido pelo usuário, sem alteração da arte.
+LEIA-ME.txt — este guia.
+
+INSTALAÇÃO
+1. Faça backup do site atual.
+2. Extraia este pacote.
+3. Publique index.html, navegacao.css e a pasta assets no mesmo diretório.
+4. Abra por HTTPS e recarregue a página para atualizar o cache.
+Não publique apenas o HTML: ele depende do arquivo navegacao.css e da pasta assets.
+Não é necessário executar SQL. A conexão e as funções de banco anteriores foram mantidas.
+
+COMPORTAMENTO
+- Até 1023 px: barra inferior com Início, Produtos, Contar, Relatórios e Mais.
+- A partir de 1024 px: barra lateral clara com os mesmos destinos.
+- Contar tem destaque verde e indicador quando existe uma contagem em andamento.
+- O item ativo usa aria-current e destaque visual.
+- A navegação fica oculta no login.
+- Mais contém atalhos existentes, nome da conta e Sair.
+- Trocar de tela encerra a câmera aberta, mas mantém a contagem em memória.
+- Uma leitura ou gravação pendente bloqueia a troca de tela.
+- Abrir a aba Contar não pede permissão de câmera automaticamente. Use Abrir câmera na tela.
+
+ESCOPO
+A opção Produtos abre o cadastro de produto já existente. Esta atualização não implementa
+listagem/edição/exclusão de produtos, gestão de usuários ou categorias, nem apresenta
+opções fictícias desses módulos. Eles continuam sendo um desenvolvimento separado.
+As seções do protótipo não foram confundidas com funções já disponíveis no banco.
+Os métodos de autenticação, lembrar login, leitura por quantidade, sons, vibração,
+relatórios, CSV, Autor condicional e painéis recolhíveis permanecem no HTML original.
+A versão anterior continua sem retomada automática de contagens após recarregar a página.
+
+VALIDAÇÃO
+Verificação sintática do JavaScript, análise do CSS, preservação dos IDs anteriores,
+estrutura HTML e testes simulados de rotas, destaque ativo, proteção de leitura pendente
+e encerramento de câmera na troca de tela.
+Não houve teste em navegador com câmera real ou conexão ao Supabase do usuário.
+
+PERSONALIZAÇÃO
+A identidade azul/verde e Poppins é preservada. O slogan foi atualizado para:
+Seu estoque, inventariado.
+Para ajustar o breakpoint ou a largura da barra lateral, edite navegacao.css.

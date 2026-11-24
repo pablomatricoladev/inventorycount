@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>INVENTARIEI — Contagem de estoque</title>
+  <meta name="theme-color" content="#1B4B8F" />
+  <meta name="description" content="INVENTARIEI: contagem e conferência de estoque pelo celular." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+
+:root {
+ --brand-primary:#1B4B8F; --brand-accent:#16A34A; --brand-gray:#6B7280;
+ --brand-white:#FFFFFF; --brand-black:#000000; --font-family:"Poppins",sans-serif;
+ --font-weight-regular:400; --font-weight-medium:500; --font-weight-semibold:600; --font-weight-bold:700;
+ --bg:#F5F7FB; --ink:#172A46; --line:#E2E8F1; --soft:#EDF3FC; --radius:18px;
+ --shadow:0 8px 30px #1B4B8F0B;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font-family); font-weight:var(--font-weight-regular); background:var(--bg); color:var(--ink); min-height:100vh; padding:0 24px; font-size:14px; line-height:1.65; -webkit-font-smoothing:antialiased; }
+input,select,button { font:inherit; }
+.container { max-width:1080px; margin:auto; padding:28px 0 16px; }
+.app-header { display:flex; align-items:center; justify-content:space-between; gap:16px; border-bottom:1px solid var(--line); padding-bottom:23px; margin-bottom:32px; }
+.brand { display:flex; align-items:center; gap:12px; }
+.brand-symbol { height:45px; width:45px; flex-shrink:0; border-radius:13px; display:grid; place-items:center; background:var(--brand-primary); color:white; position:relative; }
+.brand-symbol::after { content:""; position:absolute; right:-2px; bottom:-1px; height:9px; width:9px; border:2px solid white; background:var(--brand-accent); border-radius:50%; }
+.brand-symbol svg { width:25px; height:25px; }
+.brand-name { color:var(--brand-primary); font-weight:var(--font-weight-bold); letter-spacing:-.02em; font-size:22px; line-height:1.2; }
+.brand-tagline { color:var(--brand-gray); font-weight:var(--font-weight-regular); font-size:11px; margin-top:4px; }
+.header-label { font-size:11px; color:var(--brand-gray); border:1px solid var(--line); border-radius:99px; background:white; padding:7px 12px; }
+h1,h2,h3 { color:var(--ink); font-weight:600; letter-spacing:-.035em; line-height:1.3; }
+h1 { font-size:28px; margin-bottom:10px; } h2 { font-size:20px; margin-bottom:15px; }
+.card { background:white; padding:30px; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:20px; }
+.eyebrow { text-transform:uppercase; font-size:10px; letter-spacing:1.6px; font-weight:600; color:var(--brand-primary); margin-bottom:9px; }
+.subtitulo { color:var(--brand-gray); font-size:13px; line-height:1.85; margin-bottom:24px; max-width:620px; }
+label { display:block; color:#44536B; font-size:12px; font-weight:500; margin:18px 0 7px; }
+input,select { width:100%; min-height:49px; padding:12px 14px; border:1px solid #D7DFEB; border-radius:10px; background:#FCFDFF; color:var(--ink); font-size:16px; transition:border-color .16s,box-shadow .16s; }
+input::placeholder { color:#8B96A7; font-size:13px; opacity:1; }
+input:hover,select:hover { border-color:#AEBFD8; }
+input:focus,select:focus { outline:0; border-color:var(--brand-primary); box-shadow:0 0 0 3px #1B4B8F14; background:white; }
+input[readonly],input:disabled,select:disabled { background:#F1F4F8; color:var(--brand-gray); }
+input:disabled,select:disabled { opacity:.65; cursor:not-allowed; }
+button { width:100%; min-height:48px; padding:12px 18px; margin-top:16px; border:1px solid transparent; border-radius:10px; background:var(--brand-primary); color:white; font-size:13px; font-weight:600; line-height:1.55; cursor:pointer; touch-action:manipulation; transition:background .16s,transform .16s,box-shadow .16s; }
+button:hover:not(:disabled) { background:#153D75; box-shadow:0 5px 16px #1B4B8F1A; }
+button:active:not(:disabled) { transform:translateY(1px); }
+button:focus-visible,summary:focus-visible { outline:3px solid #7B9DCB; outline-offset:3px; }
+button.secondary { background:#EFF3F9; color:var(--brand-primary); border-color:#DFE7F1; }
+button.secondary:hover:not(:disabled) { background:#E3EBF6; box-shadow:none; }
+button.success,#botao-salvar-produto,#salvar-produto-modal { background:var(--brand-accent); }
+button.success:hover:not(:disabled),#botao-salvar-produto:hover:not(:disabled),#salvar-produto-modal:hover:not(:disabled) { background:#15803D; }
+button.danger { background:#FFF2F1; color:#A73939; border-color:#F2DAD7; }
+button.danger:hover:not(:disabled) { background:#FCE5E3; box-shadow:none; }
+button:disabled { opacity:.48; cursor:not-allowed; box-shadow:none; }
+.hidden { display:none !important; }
+.topo { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-bottom:22px; }
+.topo strong { font-size:13px; font-weight:500; color:var(--brand-gray); overflow-wrap:anywhere; }
+.topo button { width:auto; min-height:36px; padding:7px 13px; font-size:11px; margin:0; flex-shrink:0; }
+.mensagem { font-size:12px; line-height:1.75; border:1px solid transparent; padding:12px 14px; margin-top:14px; border-radius:10px; white-space:pre-line; overflow-wrap:anywhere; }
+.sucesso { background:#F0FDF4; color:#166534; border-color:#D3EEDD; }
+.erro { background:#FFF1F0; color:#9F3535; border-color:#F3D9D6; }
+.aviso { background:#FFFAEB; color:#856322; border-color:#F2E6C8; }
+.info { background:var(--soft); color:var(--brand-primary); border-color:#DAE6F7; }
+#mensagem-global:not(:empty) { margin-bottom:20px; }
+.ajuda { color:var(--brand-gray); font-size:11px; line-height:1.85; margin-top:12px; }
+.reader { width:100%; overflow:hidden; border-radius:14px; background:#13243D; margin-top:18px; scroll-margin-block:20px; }
+.reader:empty { display:none; }
+.reader video { width:100% !important; display:block; }
+#reader-contagem { outline:none; }
+#reader-contagem:focus-visible { outline:3px solid #7B9DCB; outline-offset:4px; }
+.resumo { background:var(--soft); color:var(--brand-primary); border:1px solid #DAE6F7; padding:14px 16px; border-radius:11px; margin-bottom:12px; font-size:12px; line-height:1.9; }
+.lista-item { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:16px 3px; border-bottom:1px solid #EDF0F5; font-size:13px; }
+.lista-item:last-child { border-bottom:0; }
+.lista-item span:first-child { overflow-wrap:anywhere; }
+.lista-item small { color:var(--brand-gray); font-size:11px; }
+.contador { display:grid; place-items:center; min-width:42px; height:36px; padding:0 8px; border-radius:9px; background:var(--soft); color:var(--brand-primary); font-size:17px; font-weight:600; flex-shrink:0; }
+dialog { width:min(94vw,520px); max-height:90vh; max-height:90dvh; overflow:auto; margin:auto; padding:30px; border:1px solid var(--line); border-radius:21px; background:white; color:var(--ink); box-shadow:0 24px 100px #102E5938; }
+dialog::backdrop { background:#102340B3; backdrop-filter:blur(4px); }
+dialog h2 { font-size:22px; } dialog p { margin-top:10px; line-height:1.75; }
+.linha-acoes { display:flex; gap:10px; align-items:stretch; } .linha-acoes button { flex:1; }
+#leitura-descricao { font-weight:600; }
+#leitura-codigo { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:12px; background:#F3F6FA; padding:9px 11px; border-radius:7px; }
+#leitura-quantidade { height:82px; text-align:center; font-weight:600; font-size:36px; color:var(--brand-primary); }
+.grade-resumo { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:22px 0; }
+.indicador { background:#F8FAFD; border:1px solid var(--line); padding:18px; border-radius:13px; }
+.indicador small { display:block; min-height:36px; color:var(--brand-gray); font-size:10px; line-height:1.65; margin-bottom:8px; }
+.indicador strong { color:var(--brand-primary); font-size:30px; font-weight:600; letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+#relatorio-corretos { color:var(--brand-accent); } #relatorio-faltantes { color:#BA4D42; } #relatorio-excedentes,#relatorio-desconhecidos { color:#997425; }
+.tabela-container { width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:12px; margin-top:20px; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th,td { text-align:left; padding:14px 12px; border-bottom:1px solid #E9EDF4; vertical-align:top; }
+th { background:#F4F7FC; color:#65738A; font-size:10px; font-weight:600; letter-spacing:.4px; white-space:nowrap; }
+tr:last-child td { border-bottom:0; } tbody tr:hover { background:#FAFCFF; }
+td small { display:block; color:var(--brand-gray); font-size:10px; margin-top:5px; } td:not(:first-child) { font-variant-numeric:tabular-nums; }
+.metadados-relatorio { white-space:pre-line; overflow-wrap:anywhere; font-size:11px; color:var(--brand-gray); line-height:1.9; }
+.app-footer { text-align:center; padding:28px 0 10px; color:var(--brand-gray); font-size:10px; }
+#tela-cadastro,#tela-contagem { max-width:760px; margin:auto; }
+#tela-login { display:grid; grid-template-columns:.95fr 1fr; max-width:940px; min-height:510px; padding:0; margin:45px auto; overflow:hidden; }
+.login-story { background:var(--brand-primary); padding:44px 35px; color:white; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; }
+.login-story::after { content:""; position:absolute; height:350px; width:350px; border:1px solid #FFFFFF16; border-radius:50%; right:-160px; bottom:-85px; box-shadow:0 0 0 55px #FFFFFF05,0 0 0 110px #FFFFFF03; pointer-events:none; }
+.login-story .eyebrow { color:#BBD1F1; } .login-story h2 { color:white; font-size:35px; line-height:1.25; margin:18px 0; letter-spacing:-.04em; }
+.login-story p { color:#D8E4F5; font-size:12px; line-height:1.95; max-width:280px; }
+.story-bottom { margin-top:42px; position:relative; z-index:1; }
+.barcode-mark { display:flex; gap:4px; align-items:center; height:40px; margin-bottom:16px; }
+.barcode-mark i { height:100%; width:3px; border-radius:1px; background:#CFDEF4; } .barcode-mark i:nth-child(3n) { width:7px; } .barcode-mark i:nth-child(4n) { height:72%; }
+.story-bottom span { font-size:9px; text-transform:uppercase; letter-spacing:1.5px; color:#D0DFF4; }
+.login-form-panel { padding:44px 37px; align-self:center; } .login-form-panel h1 { font-size:27px; } .login-form-panel .subtitulo { font-size:12px; margin-bottom:24px; }
+#botao-login { margin-top:24px; } .login-note { text-align:center; color:var(--brand-gray); font-size:10px; margin-top:22px; }
+.home-heading { margin:8px 0 28px; } .home-heading h1 { font-size:32px; } .home-heading .subtitulo { margin-bottom:0; }
+.home-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+.home-actions button { position:relative; display:flex; flex-direction:column; align-items:flex-start; text-align:left; min-height:220px; padding:25px; margin:0; background:white; color:var(--ink); border:1px solid var(--line); border-radius:17px; box-shadow:var(--shadow); }
+.home-actions button:hover:not(:disabled) { background:white; border-color:#AEC4E2; box-shadow:0 12px 28px #1B4B8F0E; transform:translateY(-3px); }
+.action-icon { display:grid; place-items:center; width:44px; height:44px; margin-bottom:22px; background:var(--soft); border-radius:12px; color:var(--brand-primary); } .action-icon svg { width:23px; height:23px; }
+#botao-ir-contagem .action-icon { color:var(--brand-accent); background:#F0FDF4; }
+.action-title { font-size:16px; font-weight:600; letter-spacing:-.02em; } .action-description { color:var(--brand-gray); font-size:11px; font-weight:400; line-height:1.85; margin-top:8px; }
+.action-arrow { position:absolute; right:21px; top:29px; color:#9AAFCB; font-size:21px; font-weight:400; }
+.home-tip { display:flex; align-items:flex-start; gap:12px; background:#EDF3FC; color:#526B8D; border:1px solid #DEE8F6; padding:18px 20px; border-radius:12px; margin-top:24px; font-size:11px; line-height:1.85; } .home-tip svg { height:19px; width:19px; flex-shrink:0; margin-top:1px; }
+/* Opções de sessão e painéis recolhíveis */
+.remember-label { display:flex; align-items:center; gap:9px; cursor:pointer; margin-top:17px; font-size:12px; }
+.remember-label input { appearance:auto; width:18px; height:18px; min-height:0; padding:0; margin:0; accent-color:var(--brand-primary); flex-shrink:0; }
+.remember-help { margin-top:5px; font-size:10px; color:var(--brand-gray); }
+.user-caption { display:block; text-transform:uppercase; letter-spacing:1px; color:var(--brand-gray); font-size:9px; }
+#usuario-logado { color:var(--brand-primary); }
+details.collapsible { padding:0; overflow:visible; }
+.collapsible>summary { list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:20px 24px; border-radius:var(--radius); }
+.collapsible>summary::-webkit-details-marker { display:none; }
+.collapsible>summary::after { content:""; height:8px; width:8px; border-right:2px solid var(--brand-primary); border-bottom:2px solid var(--brand-primary); transform:rotate(45deg); transition:transform .16s; flex-shrink:0; margin-right:4px; }
+.collapsible[open]>summary::after { transform:rotate(225deg); }
+.collapsible>summary:hover { background:#F8FAFE; }
+.collapsible>summary h2 { font-size:16px; margin:0; }
+.summary-caption { display:block; color:var(--brand-gray); font-size:10px; margin-top:5px; font-weight:400; }
+.panel-content { padding:0 24px 24px; border-top:1px solid #EEF2F7; }
+.panel-content>.resumo { margin-top:18px; }
+.manual-panel { border:1px solid var(--line); border-radius:12px; margin-top:22px; background:#FAFCFF; }
+.manual-panel>summary { padding:14px 16px; font-size:12px; font-weight:500; }
+.manual-panel>summary::after { height:6px; width:6px; }
+.manual-panel .panel-content { padding:0 16px 18px; }
+.contagem-feedback:has(>.mensagem) { margin:-8px 0 20px; }
+.contagem-actions { margin-bottom:20px; } .contagem-actions button { margin-top:0; }
+.camera-hint { font-size:11px; margin-top:12px; color:var(--brand-gray); }
+@media(min-width:820px) { #form-produto { max-width:620px; margin:auto; } }
+@media(max-width:720px) {
+ body { padding:0 16px; } .container { padding-top:20px; } .app-header { margin-bottom:24px; padding-bottom:18px; }
+ .brand-symbol { width:39px; height:39px; border-radius:11px; } .brand-name { font-size:19px; } .brand-tagline { font-size:10px; } .header-label { display:none; }
+ .card { padding:22px; border-radius:16px; } h1 { font-size:24px; } h2 { font-size:19px; }
+ #tela-login { grid-template-columns:1fr; margin:22px auto; max-width:440px; } .login-story { padding:25px; } .login-story h2 { font-size:27px; margin:8px 0 10px; } .login-story p { font-size:11px; max-width:none; } .story-bottom { display:none; } .login-form-panel { padding:28px 23px; }
+ .home-heading h1 { font-size:26px; } .home-actions { grid-template-columns:1fr; gap:12px; } .home-actions button { min-height:136px; padding:20px 46px 20px 80px; justify-content:center; }
+ .action-icon { position:absolute; left:20px; top:28px; margin:0; width:41px; height:41px; } .action-title { font-size:15px; } .action-arrow { top:43px; right:17px; }
+ .grade-resumo { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; } .indicador { padding:14px; } .indicador strong { font-size:27px; }
+ dialog { padding:24px; border-radius:18px; } th,td { padding:12px 9px; } .topo strong { font-size:12px; }
+ .collapsible>summary { padding:18px 20px; } .panel-content { padding:0 20px 20px; } .manual-panel>summary { padding:14px 16px; }
+}
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none !important; animation:none !important; scroll-behavior:auto !important; } }
+
+  </style>
+  <link rel="stylesheet" href="navegacao.css" />
+</head>
+
+<body data-iv-auth="false">
+  <main id="conteudo-app" class="container" tabindex="-1">
+<header class="app-header"><div class="brand"><img class="iv-brand-image" src="assets/simbolo.jpg" width="46" height="46" alt="" /><div><div class="brand-name">INVENTARIEI</div><div class="brand-tagline">Seu estoque, inventariado.</div></div></div><span class="header-label">Contagem e conferência de estoque</span></header>
+
+    <div id="mensagem-global" tabindex="-1" role="alert" aria-live="polite"></div>
+
+    <!-- LOGIN -->
+    <section id="tela-login" class="card">
+      <aside class="login-story"><div><div class="eyebrow">Clareza em cada leitura</div><h2>Conte com<br>mais controle.</h2><p>Cadastre produtos, conte com a câmera do celular e simplifique sua rotina de conferência.</p></div><div class="story-bottom"><div class="barcode-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span>Leia. Confira. Inventariei.</span></div></aside><div class="login-form-panel"><div class="eyebrow">Bem-vindo ao INVENTARIEI</div><h1>Acesse sua conta</h1><p class="subtitulo">Entre para organizar sua próxima contagem.</p>
+
+      <form id="form-login">
+        <label for="login-email">E-mail</label>
+        <input
+          id="login-email"
+          type="email"
+          placeholder="seu@email.com"
+          autocomplete="username"
+          required
+        />
+
+        <label for="login-senha">Senha</label>
+        <input
+          id="login-senha"
+          type="password"
+          placeholder="Sua senha"
+          autocomplete="current-password"
+          required
+        />
+
+        <label class="remember-label" for="lembrar-login"><input id="lembrar-login" type="checkbox" /> Lembrar login neste dispositivo</label>
+        <p class="remember-help">Use somente em um dispositivo de confiança. Sua senha não será armazenada pelo aplicativo.</p>
+        <button id="botao-login" type="submit">
+          Entrar
+        </button>
+      </form>
+
+      <div id="mensagem-login" role="status" aria-live="polite"></div><p class="login-note">Sua rotina de inventário começa aqui.</p></div>
+    </section>
+
+    <!-- MENU -->
+    <section id="tela-menu" class="hidden">
+<div class="home-heading"><div class="eyebrow">Seu espaço de trabalho</div><h1>Tudo pronto para conferir?</h1><p class="subtitulo">Cadastre, conte e acompanhe. Seu inventário organizado em um só lugar.</p></div><div class="home-actions"><button id="botao-ir-cadastro" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9M7 5.8l9 5"/></svg></span><span class="action-title">Produtos</span><span class="action-description">Cadastre códigos e organize as informações dos seus itens.</span><span class="action-arrow" aria-hidden="true">↗</span></button><button id="botao-ir-contagem" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4"/><path d="M7 8v8m3-8v8m4-8v8m3-8v8"/></svg></span><span class="action-title">Nova contagem</span><span class="action-description">Inicie ou continue a conferência com a câmera do celular.</span><span class="action-arrow" aria-hidden="true">↗</span></button><button id="botao-ir-relatorios" type="button"><span class="action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 16v-4m5 4V7m5 9v-7"/></svg></span><span class="action-title">Relatórios</span><span class="action-description">Confira divergências e exporte os resultados das contagens.</span><span class="action-arrow" aria-hidden="true">↗</span></button></div><div class="home-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-9v.01"/></svg><span>Um fluxo simples: cadastre os produtos, realize a contagem e confira o relatório de divergências.</span></div>
+    </section>
+    <!-- CADASTRO -->
+    <section id="tela-cadastro" class="hidden">
+      <div class="topo">
+        <strong>Cadastro de produto</strong>
+
+        <button
+          id="botao-voltar-cadastro"
+          type="button"
+          class="secondary"
+        >
+          Voltar
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Catálogo de produtos</div><h2>Cadastrar produto</h2><p class="subtitulo">Leia o código de barras e complete as informações do item.</p>
+
+        <form id="form-produto">
+          <label for="cadastro-codigo">Código de barras</label>
+          <input
+            id="cadastro-codigo"
+            type="text"
+            placeholder="Leia ou digite o código"
+            autocomplete="off"
+            required
+          />
+
+          <button id="botao-escanear-cadastro" type="button">
+            Escanear código
+          </button>
+
+          <button
+            id="botao-parar-cadastro"
+            type="button"
+            class="secondary hidden"
+          >
+            Parar câmera
+          </button>
+
+          <div id="reader-cadastro" class="reader"></div>
+
+          <label for="cadastro-descricao">Descrição</label>
+          <input
+            id="cadastro-descricao"
+            type="text"
+            placeholder="Descrição do produto"
+            required
+          />
+
+          <label for="cadastro-categoria">Categoria</label>
+          <select id="cadastro-categoria" required><option value="">Carregando categorias...</option></select>
+          <div id="grupo-cadastro-autor" class="hidden">
+            <label for="cadastro-autor">Autor</label>
+            <input id="cadastro-autor" type="text" placeholder="Autor" disabled />
+          </div>
+
+          <label for="cadastro-quantidade">Quantidade inicial</label>
+          <input
+            id="cadastro-quantidade"
+            type="number"
+            min="0"
+            step="1"
+            value="1"
+            required
+          />
+
+          <button id="botao-salvar-produto" type="submit">
+            Salvar produto
+          </button>
+        </form>
+
+        <div id="mensagem-cadastro" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- CONTAGEM -->
+    <section id="tela-contagem" class="hidden">
+      <div class="topo"><strong>Contagem</strong><button id="botao-voltar-contagem" type="button" class="secondary">Voltar</button></div>
+      <details id="card-contagem" class="card collapsible" open>
+        <summary><div><div class="eyebrow">Inventário físico</div><h2 id="titulo-contagem">Nova contagem</h2><span id="status-card-contagem" class="summary-caption">Defina um nome para começar.</span></div></summary>
+        <div class="panel-content">
+          <form id="form-contagem">
+            <label for="contagem-nome">Nome da contagem</label>
+            <input id="contagem-nome" type="text" placeholder="Contagem semanal" required />
+            <button id="botao-iniciar-contagem" type="submit">Iniciar contagem</button>
+          </form>
+        </div>
+      </details>
+      <div id="mensagem-contagem" class="contagem-feedback" role="status" aria-live="polite"></div>
+      <div id="painel-leitura" class="hidden">
+        <div class="card" id="card-camera">
+          <div class="eyebrow">Leitura pela câmera</div><h2>Escaneie. Confira. Continue.</h2>
+          <p class="ajuda">Leia o código e informe a quantidade do lote. Após confirmar, a câmera é liberada automaticamente.</p>
+          <button id="botao-escanear-contagem" type="button">Abrir câmera</button>
+          <button id="botao-parar-camera" type="button" class="secondary hidden">Parar câmera</button>
+          <div id="reader-contagem" class="reader" tabindex="-1" role="region" aria-label="Área de leitura do código de barras"></div>
+          <div id="resultado-leitura" role="status" aria-live="polite"></div>
+          <details id="card-codigo-manual" class="collapsible manual-panel">
+            <summary><span>Código manual<span class="summary-caption">Abra se preferir digitar o código.</span></span></summary>
+            <div class="panel-content">
+              <form id="form-manual">
+                <label for="codigo-manual">Código do produto</label>
+                <input id="codigo-manual" type="text" placeholder="Digite o código" autocomplete="off" required />
+                <button id="botao-registrar-manual" type="submit" class="secondary">Informar código e quantidade</button>
+              </form>
+            </div>
+          </details>
+        </div>
+        <details id="card-itens-conferidos" class="card collapsible">
+          <summary><div><h2>Itens conferidos</h2><span id="resumo-itens-compacto" class="summary-caption">Nenhuma unidade conferida.</span></div></summary>
+          <div class="panel-content"><div id="resumo-contagem" class="resumo"></div><div id="lista-contagem"></div></div>
+        </details>
+        <div class="contagem-actions"><button id="botao-finalizar-contagem" type="button" class="danger">Finalizar contagem</button></div>
+      </div>
+    </section>
+
+    <dialog id="modal-leitura" aria-labelledby="titulo-modal-leitura">
+      <h2 id="titulo-modal-leitura">Conferir leitura</h2>
+      <p id="leitura-descricao"></p>
+      <p id="leitura-codigo" class="ajuda"></p>
+      <div id="pergunta-cadastro" class="hidden">
+        <p>Este código não está cadastrado. Deseja cadastrar o item agora?</p>
+        <div class="linha-acoes">
+          <button id="sim-cadastrar" type="button">Sim, cadastrar</button>
+          <button id="nao-cadastrar" type="button" class="secondary">Não, manter pendência</button>
+        </div>
+      </div>
+      <form id="form-quantidade">
+        <label for="leitura-quantidade">Quantidade desta leitura (unidades)</label>
+        <input id="leitura-quantidade" type="number" min="1" step="1" max="2147483647" value="1" required />
+        <p class="ajuda">Esta quantidade será somada à contagem, não substituirá o total anterior. Nada é contado até confirmar.</p>
+        <button id="confirmar-quantidade" type="submit" class="success">Confirmar quantidade</button>
+      </form>
+      <button id="cancelar-leitura" type="button" class="secondary">Cancelar esta leitura</button>
+      <div id="mensagem-quantidade" role="status" aria-live="polite"></div>
+    </dialog>
+
+    <dialog id="modal-produto" aria-labelledby="titulo-modal-produto">
+      <h2 id="titulo-modal-produto">Cadastrar item identificado</h2>
+      <form id="form-produto-modal">
+        <label for="modal-codigo">Código de barras</label><input id="modal-codigo" type="text" readonly />
+        <label for="modal-descricao">Descrição</label><input id="modal-descricao" required />
+        <label for="modal-categoria">Categoria</label><select id="modal-categoria" required></select>
+        <div id="grupo-modal-autor" class="hidden">
+          <label for="modal-autor">Autor</label><input id="modal-autor" disabled />
+        </div>
+        <label for="modal-estoque">Quantidade prevista no sistema</label><input id="modal-estoque" type="number" min="0" step="1" max="2147483647" value="0" required />
+        <p class="ajuda">O estoque previsto é independente da quantidade física desta leitura. Se você não tem um saldo de referência, revise o valor antes de fechar o inventário.</p>
+        <button id="salvar-produto-modal" type="submit">Salvar cadastro e voltar à quantidade</button>
+      </form>
+      <button id="cancelar-produto-modal" type="button" class="secondary">Voltar sem cadastrar</button>
+      <div id="mensagem-produto-modal" role="status" aria-live="polite"></div>
+    </dialog>
+
+    <section id="tela-relatorios" class="hidden">
+      <div class="topo"><strong>Relatórios</strong><button id="botao-voltar-relatorios" class="secondary" type="button">Voltar</button></div>
+      <div class="card">
+        <div class="eyebrow">Resultados e divergências</div><h2>Histórico de contagens</h2>
+        <label for="relatorio-contagem">Contagem</label><select id="relatorio-contagem"><option value="">Selecione</option></select>
+        <button id="botao-atualizar-relatorios" type="button" class="secondary">Atualizar histórico</button>
+        <div id="mensagem-relatorios" role="status" aria-live="polite"></div>
+      </div>
+      <div id="painel-relatorio" class="hidden">
+        <div class="card">
+          <h2 id="relatorio-titulo"></h2><p id="relatorio-metadados" class="metadados-relatorio"></p>
+          <div class="grade-resumo">
+            <div class="indicador"><small>Unidades previstas</small><strong id="relatorio-previsto">0</strong></div>
+            <div class="indicador"><small>Contadas — cadastrados</small><strong id="relatorio-contado">0</strong></div>
+            <div class="indicador"><small>Unidades faltantes</small><strong id="relatorio-faltantes">0</strong></div>
+            <div class="indicador"><small>Unidades excedentes</small><strong id="relatorio-excedentes">0</strong></div>
+            <div class="indicador"><small>Produtos corretos</small><strong id="relatorio-corretos">0</strong></div>
+            <div class="indicador"><small>Unidades não cadastradas</small><strong id="relatorio-desconhecidos">0</strong></div>
+          </div>
+          <p class="ajuda">Indicadores da contagem inteira. Pendências não entram nas divergências dos produtos. Quantidades previstas são registradas no fechamento; textos vêm do cadastro atual.</p>
+        </div>
+        <div class="card">
+          <label for="relatorio-filtro">Situação</label>
+          <select id="relatorio-filtro"><option value="todos">Todas</option><option value="faltante">Faltantes</option><option value="excedente">Excedentes</option><option value="correto">Corretos</option><option value="nao_cadastrado">Não cadastrados</option></select>
+          <label for="relatorio-busca">Busca</label><input id="relatorio-busca" type="search" placeholder="Código ou descrição" />
+          <button id="botao-exportar-relatorio" type="button" class="success" disabled>Exportar CSV dos itens filtrados</button>
+          <p id="relatorio-total-exibido" class="ajuda"></p>
+          <div class="tabela-container"><table><thead><tr><th>Produto / código</th><th>Previsto</th><th>Contado</th><th>Diferença</th><th>Situação</th></tr></thead><tbody id="relatorio-corpo"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tela-mais" class="hidden" aria-labelledby="titulo-mais">
+      <div class="iv-more-heading"><div class="eyebrow">Preferências e atalhos</div><h1 id="titulo-mais">Mais opções</h1><p class="subtitulo">Acesse os recursos e as opções da sua conta.</p></div>
+      <div class="card">
+        <div class="iv-profile-card"><span class="iv-avatar" data-iv-initials aria-hidden="true">U</span>
+          <div><span class="user-caption">Conta conectada</span><strong id="usuario-logado">Usuário</strong></div>
+        </div>
+        <div class="iv-more-actions">
+<button class="iv-more-link" type="button" data-iv-route="cadastro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9M7 5.8l9 5"/></svg><span>Cadastrar produto<small>Abrir o cadastro de um novo item.</small></span></button>
+<button class="iv-more-link" type="button" data-iv-route="contagem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4M7 8v8m3-8v8m4-8v8m3-8v8"/></svg><span>Iniciar ou continuar contagem<small>Voltar à sua contagem sem criar outra.</small></span></button>
+<button class="iv-more-link" type="button" data-iv-route="relatorios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 16v-4m5 4V7m5 9v-7"/></svg><span>Consultar relatórios<small>Acessar resultados e exportar CSV.</small></span></button>
+        </div>
+        <div class="iv-session-exit"><p class="ajuda">Ao sair, o sistema encerra a sessão neste acesso. Confirme suas operações antes de continuar.</p><button id="botao-sair" type="button" class="secondary">Sair da conta</button></div>
+      </div>
+    </section>
+    <footer class="app-footer">INVENTARIEI · Seu estoque, inventariado.</footer>
+  </main>
+
+
+    <a class="iv-skip" href="#conteudo-app">Pular para o conteúdo</a>
+    <nav id="navegacao-principal" class="iv-nav" aria-label="Navegação principal" hidden>
+      <div class="iv-brand"><img class="iv-brand-image" src="assets/simbolo.jpg" alt="" width="46" height="46" />
+        <div class="iv-brand-copy"><span class="iv-brand-title">Inventariei</span><span class="iv-brand-tagline">Seu estoque, inventariado.</span></div>
+      </div>
+      <div class="iv-nav-caption">Seu espaço de trabalho</div>
+      <div class="iv-links">
+        <button class="iv-item" type="button" data-iv-route="menu" data-iv-link><span class="iv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg></span><span>Início</span></button>
+        <button class="iv-item" type="button" data-iv-route="cadastro" data-iv-link><span class="iv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9M7 5.8l9 5"/></svg></span><span>Produtos</span></button>
+        <button class="iv-item iv-item--count" type="button" data-iv-route="contagem" data-iv-link><span class="iv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4M7 8v8m3-8v8m4-8v8m3-8v8"/></svg></span><span>Contar</span><span id="nav-contagem-ativa" class="iv-dot" aria-hidden="true" hidden></span></button>
+        <button class="iv-item" type="button" data-iv-route="relatorios" data-iv-link><span class="iv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 16v-4m5 4V7m5 9v-7"/></svg></span><span>Relatórios</span></button>
+        <button class="iv-item" type="button" data-iv-route="mais" data-iv-link><span class="iv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span><span>Mais</span></button>
+      </div>
+      <button class="iv-account" type="button" data-iv-route="mais" aria-label="Abrir opções da conta">
+        <span class="iv-avatar" data-iv-initials aria-hidden="true">U</span>
+        <span class="iv-account-copy"><span class="iv-profile-name" data-iv-name>Usuário</span><span class="iv-profile-description">Opções da conta</span></span>
+        <span class="iv-account-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></span>
+      </button>
+    </nav>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const SUPABASE_URL =
+        "https://adhwuratwiogwftubtuv.supabase.co";
+
+      const SUPABASE_PUBLIC_KEY =
+        "sb_publishable_NmBbJifJZQ-gO0Mjn1u4WQ_MZyZnjRC";
+
+      const el = (id) => document.getElementById(id);
+
+      let db = null;
+      let usuarioAtual = null;
+      let contagemAtual = null;
+
+      let scanner = null;
+      let tipoScanner = null;
+      let abrindoCamera = false;
+      let parandoCamera = false;
+
+      let cadastroDetectado = false;
+      let leituraArmada = false;
+      let registrandoLeitura = false;
+      let finalizandoContagem = false;
+      let autenticando = false;
+      let audioContext = null;
+
+      const telas = {
+        login: el("tela-login"),
+        menu: el("tela-menu"),
+        cadastro: el("tela-cadastro"),
+        contagem: el("tela-contagem"),
+        relatorios: el("tela-relatorios"),
+        mais: el("tela-mais")
+      };
+
+      function mostrarTela(nome) {
+        Object.values(telas).forEach((tela) => {
+          tela.classList.add("hidden");
+        });
+
+        telas[nome].classList.remove("hidden");
+        atualizarNavegacao1a(nome);
+      }
+
+      function exibirMensagem(elemento, texto, tipo = "info") {
+        const caixa = document.createElement("div");
+        caixa.className = `mensagem ${tipo}`;
+        caixa.textContent = texto;
+
+        elemento.replaceChildren(caixa);
+      }
+
+      function limparMensagem(elemento) {
+        elemento.replaceChildren();
+      }
+
+      function detalheErro(erro) {
+        if (typeof erro === "string") return erro;
+
+        return erro?.message ||
+          erro?.error_description ||
+          "Ocorreu um erro inesperado.";
+      }
+
+      function registrarErro(elemento, contexto, erro) {
+        console.error(contexto, erro);
+
+        exibirMensagem(
+          elemento,
+          `${contexto}: ${detalheErro(erro)}`,
+          "erro"
+        );
+      }
+
+      function exigirConexao() {
+        if (!db) {
+          throw new Error(
+            "A conexão com o Supabase não foi inicializada. " +
+            "Verifique a configuração e recarregue a página."
+          );
+        }
+
+        return db;
+      }
+
+      async function obterUsuario() {
+        const { data, error } = await exigirConexao().auth.getUser();
+
+        if (error) throw error;
+
+        if (!data.user) {
+          throw new Error(
+            "Sua sessão não está disponível. Entre novamente."
+          );
+        }
+
+        return data.user;
+      }
+
+      // Os sons são gerados localmente, sem baixar arquivos de áudio.
+      function prepararAudio() {
+        try {
+          const AudioClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioClass) return Promise.resolve(null);
+          if (!audioContext || audioContext.state === "closed") {
+            audioContext = new AudioClass();
+          }
+          const contexto = audioContext;
+          if (contexto.state === "suspended") {
+            return contexto.resume().then(() => contexto).catch((erro) => {
+              console.debug("Não foi possível liberar o áudio:", erro);
+              return null;
+            });
+          }
+          return Promise.resolve(contexto);
+        } catch (erro) {
+          console.debug("Áudio indisponível:", erro);
+          return Promise.resolve(null);
+        }
+      }
+
+      async function tocarSequenciaSonora(notas) {
+        try {
+          const contexto = await prepararAudio();
+          if (!contexto || contexto.state !== "running") return;
+          const agora = contexto.currentTime + 0.01;
+          for (const nota of notas) {
+            const inicio = agora + nota.atraso;
+            const fim = inicio + nota.duracao;
+            const oscilador = contexto.createOscillator();
+            const volume = contexto.createGain();
+            oscilador.type = "sine";
+            oscilador.frequency.setValueAtTime(nota.frequencia, inicio);
+            volume.gain.setValueAtTime(0, inicio);
+            volume.gain.linearRampToValueAtTime(nota.volume ?? 0.16, inicio + 0.008);
+            volume.gain.setValueAtTime(nota.volume ?? 0.16, fim - 0.02);
+            volume.gain.linearRampToValueAtTime(0, fim);
+            oscilador.connect(volume);
+            volume.connect(contexto.destination);
+            oscilador.onended = () => {
+              oscilador.disconnect();
+              volume.disconnect();
+            };
+            oscilador.start(inicio);
+            oscilador.stop(fim + 0.01);
+          }
+        } catch (erro) {
+          // Uma falha no áudio não pode interromper leitura ou gravação.
+          console.debug("Não foi possível emitir o som:", erro);
+        }
+      }
+
+      function vibrarDispositivo(padrao) {
+        try { if (typeof navigator.vibrate === "function") navigator.vibrate(padrao); }
+        catch (erro) { console.debug("Vibração indisponível:", erro); }
+      }
+      function tocarBipLeitura() {
+        vibrarDispositivo(100);
+        void tocarSequenciaSonora([{ frequencia:1450, atraso:0, duracao:0.14, volume:0.40 }]);
+      }
+      function tocarSomConfirmacao() {
+        vibrarDispositivo([100,70,150]);
+        void tocarSequenciaSonora([
+          { frequencia:850, atraso:0, duracao:0.14, volume:0.35 },
+          { frequencia:1200, atraso:0.18, duracao:0.20, volume:0.40 }
+        ]);
+      }
+
+      function atualizarControles() {
+        const ocupada = abrindoCamera || parandoCamera;
+        const cameraCadastro = tipoScanner === "cadastro";
+        const cameraContagem = tipoScanner === "contagem";
+
+        el("botao-escanear-cadastro").disabled =
+          ocupada || Boolean(scanner);
+
+        el("botao-escanear-contagem").disabled =
+          ocupada ||
+          Boolean(scanner) ||
+          !contagemAtual ||
+          finalizandoContagem;
+
+        el("botao-parar-cadastro").classList.toggle(
+          "hidden",
+          !cameraCadastro
+        );
+
+        el("botao-parar-camera").classList.toggle(
+          "hidden",
+          !cameraContagem
+        );
+
+        el("botao-parar-cadastro").disabled = ocupada;
+        el("botao-parar-camera").disabled = ocupada;
+
+        el("botao-registrar-manual").disabled =
+          registrandoLeitura ||
+          finalizandoContagem ||
+          Boolean(leituraPendente) ||
+          !contagemAtual;
+
+        el("botao-finalizar-contagem").disabled =
+          registrandoLeitura ||
+          finalizandoContagem ||
+          abrindoCamera ||
+          Boolean(leituraPendente) ||
+          !contagemAtual;
+      }
+
+      function atualizarPainelContagem() {
+        const ativa = Boolean(contagemAtual);
+        atualizarIndicadorContagem1a();
+
+        el("painel-leitura").classList.toggle("hidden", !ativa);
+        el("contagem-nome").disabled = ativa;
+        el("botao-iniciar-contagem").disabled = ativa;
+
+        el("titulo-contagem").textContent =
+          ativa ? contagemAtual.nome : "Nova contagem";
+
+        if (ativa) {
+          el("contagem-nome").value = contagemAtual.nome;
+          el("status-card-contagem").textContent = "Em andamento · Clique para ver os dados da contagem.";
+        } else {
+          el("card-contagem").open = true;
+          el("status-card-contagem").textContent = "Defina um nome para começar.";
+        }
+
+        atualizarControles();
+      }
+
+      async function pararCamera() {
+        clearTimeout(temporizadorCentralizarCamera);
+        cancelarRetomadaAutomatica();
+        if (abrindoCamera) {
+          throw new Error(
+            "Aguarde a câmera terminar de abrir antes de continuar."
+          );
+        }
+
+        if (parandoCamera) {
+          throw new Error("Aguarde a câmera parar.");
+        }
+
+        if (!scanner) return;
+
+        parandoCamera = true;
+        leituraArmada = false;
+        atualizarControles();
+
+        try {
+          if (scanner.isScanning) {
+            await scanner.stop();
+          }
+
+          scanner.clear();
+          scanner = null;
+          tipoScanner = null;
+        } finally {
+          parandoCamera = false;
+          atualizarControles();
+        }
+      }
+
+      function mensagemErroCamera(erro) {
+        const nome = erro?.name || "";
+        const texto = detalheErro(erro);
+
+        if (
+          nome === "NotAllowedError" ||
+          /permission|denied|notallowed/i.test(texto)
+        ) {
+          return "Permissão da câmera negada. Libere o acesso " +
+            "à câmera nas configurações do navegador.";
+        }
+
+        if (
+          nome === "NotFoundError" ||
+          /notfound|no camera/i.test(texto)
+        ) {
+          return "Nenhuma câmera foi encontrada neste dispositivo.";
+        }
+
+        return texto;
+      }
+
+      async function abrirCamera(tipo) {
+        const mensagem = tipo === "cadastro"
+          ? el("mensagem-cadastro")
+          : el("resultado-leitura");
+
+        try {
+          exigirConexao();
+
+          if (abrindoCamera || parandoCamera || scanner) {
+            throw new Error(
+              "Uma câmera já está aberta ou sendo inicializada."
+            );
+          }
+
+          if (!window.isSecureContext) {
+            throw new Error(
+              "Abra o sistema por HTTPS ou localhost para usar a câmera."
+            );
+          }
+
+          if (!navigator.mediaDevices?.getUserMedia) {
+            throw new Error(
+              "Este navegador não disponibilizou acesso à câmera."
+            );
+          }
+
+          if (typeof window.Html5Qrcode !== "function") {
+            throw new Error(
+              "A biblioteca de leitura não carregou. " +
+              "Verifique sua conexão e recarregue a página."
+            );
+          }
+
+          if (tipo === "contagem" && !contagemAtual) {
+            throw new Error("Inicie uma contagem primeiro.");
+          }
+
+          prepararAudio();
+
+          abrindoCamera = true;
+          tipoScanner = tipo;
+          cadastroDetectado = false;
+          cancelarRetomadaAutomatica();
+          codigoEmIntervalo = "";
+          codigoBloqueadoAte = 0;
+          leituraArmada = tipo === "contagem";
+
+          const destino = tipo === "cadastro"
+            ? "reader-cadastro"
+            : "reader-contagem";
+
+          scanner = new window.Html5Qrcode(destino);
+          atualizarControles();
+
+          exibirMensagem(mensagem, "Abrindo câmera...", "info");
+
+          await scanner.start(
+            { facingMode: "environment" },
+            {
+              fps: 10,
+              qrbox: (largura, altura) => ({
+                width: Math.floor(Math.min(300, largura * 0.85)),
+                height: Math.floor(Math.min(160, altura * 0.65))
+              })
+            },
+            (codigo) => {
+              if (abrindoCamera || parandoCamera) return;
+
+              if (tipo === "cadastro") {
+                if (cadastroDetectado) return;
+
+                cadastroDetectado = true;
+                void tratarCodigoCadastro(codigo);
+                return;
+              }
+
+              if (
+                !leituraArmada ||
+                registrandoLeitura ||
+                finalizandoContagem
+              ) {
+                return;
+              }
+
+              if (String(codigo).trim() === codigoEmIntervalo && Date.now() < codigoBloqueadoAte) return;
+              leituraArmada = false;
+              tocarBipLeitura();
+              atualizarControles();
+              void registrarLeitura(codigo);
+            },
+            () => {}
+          );
+
+          exibirMensagem(
+            mensagem,
+            "Câmera aberta. Posicione o código dentro da área de leitura.",
+            "info"
+          );
+          if (tipo === "contagem") centralizarCameraNaTela();
+        } catch (erro) {
+          console.error("Erro na câmera:", erro);
+
+          if (scanner && !scanner.isScanning) {
+            try {
+              scanner.clear();
+            } catch (_) {}
+
+            scanner = null;
+            tipoScanner = null;
+          }
+
+          exibirMensagem(
+            mensagem,
+            "Não foi possível abrir a câmera: " +
+              mensagemErroCamera(erro),
+            "erro"
+          );
+        } finally {
+          abrindoCamera = false;
+          atualizarControles();
+        }
+      }
+
+      async function tratarCodigoCadastro(codigo) {
+        const mensagem = el("mensagem-cadastro");
+        const valor = String(codigo).trim();
+
+        el("cadastro-codigo").value = valor;
+        tocarBipLeitura();
+
+        try {
+          await pararCamera();
+
+          const { data, error } = await exigirConexao()
+            .from("produtos")
+            .select("id, descricao")
+            .eq("codigo_barras", valor)
+            .maybeSingle();
+
+          if (error) throw error;
+
+          if (data) {
+            exibirMensagem(
+              mensagem,
+              `Este código já está cadastrado: ${data.descricao}. ` +
+              "Não será possível cadastrar novamente.",
+              "aviso"
+            );
+          } else {
+            exibirMensagem(
+              mensagem,
+              "Código lido. Preencha a descrição e salve o produto.",
+              "sucesso"
+            );
+
+            el("cadastro-descricao").focus();
+          }
+        } catch (erro) {
+          registrarErro(mensagem, "Erro ao consultar código", erro);
+        }
+      }
+
+      function traduzirErroLogin(erro) {
+        const mensagem = detalheErro(erro);
+
+        if (/invalid login credentials/i.test(mensagem)) {
+          return "E-mail ou senha incorretos. Confirme se o usuário " +
+            "já foi cadastrado no Supabase Auth.";
+        }
+
+        if (/email not confirmed/i.test(mensagem)) {
+          return "O e-mail deste usuário ainda não foi confirmado.";
+        }
+
+        if (/invalid api key/i.test(mensagem)) {
+          return "Chave pública inválida. Confira a chave e se ela " +
+            "pertence ao mesmo projeto da URL configurada.";
+        }
+
+        if (/failed to fetch|networkerror|network request failed/i.test(mensagem)) {
+          return "Não foi possível alcançar o Supabase. " +
+            "Verifique a internet, a URL do projeto e tente novamente.";
+        }
+
+        return mensagem;
+      }
+
+      // LOGIN
+      el("form-login").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        if (autenticando) return;
+
+        const mensagem = el("mensagem-login");
+        const botao = el("botao-login");
+        const email = el("login-email").value.trim();
+        const senha = el("login-senha").value;
+
+        if (!email || !senha) {
+          exibirMensagem(
+            mensagem,
+            "Informe e-mail e senha.",
+            "erro"
+          );
+          return;
+        }
+
+        autenticando = true;
+        botao.disabled = true;
+        botao.textContent = "Entrando...";
+
+        exibirMensagem(
+          mensagem,
+          "Autenticando no Supabase...",
+          "info"
+        );
+
+        try {
+          configurarPreferenciaLogin(email);
+          const { data, error } = await exigirConexao()
+            .auth.signInWithPassword({
+              email,
+              password: senha
+            });
+
+          if (error) throw error;
+
+          if (!data.session || !data.user) {
+            throw new Error(
+              "O servidor não retornou uma sessão válida."
+            );
+          }
+
+          usuarioAtual = data.user;
+
+          await carregarNomeUsuario(data.user);
+          el("login-senha").value = "";
+
+          limparMensagem(mensagem);
+          limparMensagem(el("mensagem-global"));
+
+          mostrarTela("menu");
+        } catch (erro) {
+          console.error("Falha no login:", erro);
+
+          exibirMensagem(
+            mensagem,
+            "Não foi possível entrar: " + traduzirErroLogin(erro),
+            "erro"
+          );
+        } finally {
+          autenticando = false;
+          botao.disabled = false;
+          botao.textContent = "Entrar";
+        }
+      });
+
+      // SAIR
+      el("botao-sair").addEventListener("click", async () => {
+        const botao = el("botao-sair");
+
+        try {
+          if (registrandoLeitura || finalizandoContagem) {
+            throw new Error(
+              "Aguarde a operação atual terminar antes de sair."
+            );
+          }
+
+          if (
+            contagemAtual &&
+            !window.confirm(
+              "Existe uma contagem aberta. Ela continuará no banco, " +
+              "mas esta versão ainda não tem tela para retomá-la " +
+              "depois de sair. Deseja sair mesmo assim?"
+            )
+          ) {
+            return;
+          }
+
+          botao.disabled = true;
+          await pararCamera();
+
+          const { error } = await exigirConexao().auth.signOut();
+          if (error) throw error;
+
+          usuarioAtual = null;
+          contagemAtual = null;
+          atualizarPainelContagem();
+          mostrarTela("login");
+        } catch (erro) {
+          registrarErro(
+            el("mensagem-global"),
+            "Não foi possível sair",
+            erro
+          );
+        } finally {
+          botao.disabled = false;
+        }
+      });
+
+      // NAVEGAÇÃO
+      el("botao-ir-cadastro").addEventListener("click", async () => {
+        mostrarTela("cadastro");
+        try { await carregarCategorias(); }
+        catch (erro) { registrarErro(el("mensagem-cadastro"), "Erro ao carregar categorias. Execute a atualização SQL", erro); }
+      });
+
+      el("botao-voltar-cadastro").addEventListener("click", async () => {
+        try {
+          await pararCamera();
+          mostrarTela("menu");
+        } catch (erro) {
+          registrarErro(
+            el("mensagem-cadastro"),
+            "Não foi possível voltar",
+            erro
+          );
+        }
+      });
+
+      el("botao-ir-contagem").addEventListener("click", () => {
+        atualizarPainelContagem();
+        mostrarTela("contagem");
+      });
+
+      el("botao-voltar-contagem").addEventListener("click", async () => {
+        try {
+          if (registrandoLeitura || finalizandoContagem) {
+            throw new Error("Aguarde a operação atual terminar.");
+          }
+
+          await pararCamera();
+
+          // Mantém contagemAtual para continuar pelo menu.
+          mostrarTela("menu");
+        } catch (erro) {
+          registrarErro(
+            el("mensagem-contagem"),
+            "Não foi possível voltar",
+            erro
+          );
+        }
+      });
+
+      // CÂMERAS
+      el("botao-escanear-cadastro").addEventListener("click", () => {
+        void abrirCamera("cadastro");
+      });
+
+      el("botao-escanear-contagem").addEventListener("click", () => {
+        void abrirCamera("contagem");
+      });
+
+      el("botao-parar-cadastro").addEventListener("click", async () => {
+        try {
+          await pararCamera();
+        } catch (erro) {
+          registrarErro(
+            el("mensagem-cadastro"),
+            "Erro ao parar câmera",
+            erro
+          );
+        }
+      });
+
+      el("botao-parar-camera").addEventListener("click", async () => {
+        try {
+          await pararCamera();
+        } catch (erro) {
+          registrarErro(
+            el("resultado-leitura"),
+            "Erro ao parar câmera",
+            erro
+          );
+        }
+      });
+
+      // SALVAR PRODUTO
+      el("form-produto").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        const botao = el("botao-salvar-produto");
+        const mensagem = el("mensagem-cadastro");
+
+        if (botao.disabled) return;
+
+        const codigo = el("cadastro-codigo").value.trim();
+        const descricao = el("cadastro-descricao").value.trim();
+        const quantidadeTexto = el("cadastro-quantidade").value.trim();
+        const quantidade = Number(quantidadeTexto);
+
+        if (!codigo || !descricao || !el("cadastro-categoria").value) {
+          exibirMensagem(
+            mensagem,
+            "Informe código, descrição e selecione uma categoria.",
+            "erro"
+          );
+          return;
+        }
+
+        if (
+          quantidadeTexto === "" ||
+          !Number.isSafeInteger(quantidade) ||
+          quantidade < 0 ||
+          quantidade > 2147483647
+        ) {
+          exibirMensagem(
+            mensagem,
+            "Informe uma quantidade inteira válida, maior ou igual a zero.",
+            "erro"
+          );
+          return;
+        }
+
+        botao.disabled = true;
+        botao.textContent = "Salvando...";
+
+        try {
+          await pararCamera();
+
+          const usuario = await obterUsuario();
+
+          const { error } = await db
+            .from("produtos")
+            .insert({
+              codigo_barras: codigo,
+              descricao,
+              autor: categoriaEhLivros(el("cadastro-categoria").value) ? (el("cadastro-autor").value.trim() || null) : null,
+              categoria: el("cadastro-categoria").value.trim() || null,
+              quantidade_sistema: quantidade,
+              criado_por: usuario.id
+            });
+
+          if (error) throw error;
+
+          el("form-produto").reset();
+
+          exibirMensagem(
+            mensagem,
+            "Produto cadastrado com sucesso.",
+            "sucesso"
+          );
+
+          el("cadastro-codigo").focus();
+        } catch (erro) {
+          if (erro.code === "23505") {
+            exibirMensagem(
+              mensagem,
+              "Este código de barras já está cadastrado.",
+              "erro"
+            );
+          } else {
+            registrarErro(mensagem, "Erro ao salvar produto", erro);
+          }
+        } finally {
+          botao.disabled = false;
+          botao.textContent = "Salvar produto";
+        }
+      });
+
+      // INICIAR CONTAGEM
+      el("form-contagem").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        if (contagemAtual) return;
+
+        const botao = el("botao-iniciar-contagem");
+        const mensagem = el("mensagem-contagem");
+        const nome = el("contagem-nome").value.trim();
+
+        if (botao.disabled) return;
+
+        if (!nome) {
+          exibirMensagem(
+            mensagem,
+            "Informe o nome da contagem.",
+            "erro"
+          );
+          return;
+        }
+
+        botao.disabled = true;
+        botao.textContent = "Iniciando...";
+
+        try {
+          const usuario = await obterUsuario();
+
+          const { data, error } = await db
+            .from("contagens")
+            .insert({
+              nome,
+              usuario_id: usuario.id,
+              status: "aberta"
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          contagemAtual = data;
+          el("card-contagem").open = false;
+          el("card-codigo-manual").open = false;
+          el("card-itens-conferidos").open = false;
+          el("resumo-itens-compacto").textContent = "Nenhuma unidade conferida.";
+
+          limparMensagem(el("resultado-leitura"));
+          atualizarPainelContagem();
+
+          exibirMensagem(
+            mensagem,
+            "Contagem iniciada. Use a câmera ou informe o código manualmente.",
+            "sucesso"
+          );
+
+          await carregarItensContagem();
+        } catch (erro) {
+          registrarErro(mensagem, "Erro ao iniciar contagem", erro);
+        } finally {
+          botao.textContent = "Iniciar contagem";
+          atualizarPainelContagem();
+        }
+      });
+
+      // REGISTRO MANUAL
+      el("form-manual").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+
+        const codigo = el("codigo-manual").value.trim();
+
+        if (!codigo) return;
+
+        prepararAudio();
+
+        const sucesso = await registrarLeitura(codigo);
+
+        if (sucesso) {
+          el("codigo-manual").value = "";
+        }
+      });
+
+      // A leitura agora é preparada e confirmada no modal.
+      // LISTAR ITENS E AGRUPAR CÓDIGOS DESCONHECIDOS
+      async function carregarItensContagem() {
+        if (!contagemAtual) return;
+
+        const contagemId = contagemAtual.id;
+
+        const data = await paginasRelatorio(() => exigirConexao()
+          .from("contagem_itens")
+          .select("id,codigo_lido,quantidade_contada,codigo_conhecido,produtos(descricao)")
+          .eq("contagem_id", contagemId)
+          .order("lido_em", { ascending: false }).order("id"));
+
+        if (!contagemAtual || contagemAtual.id !== contagemId) return;
+
+        const agrupados = new Map();
+
+        for (const item of data || []) {
+          const codigo = item.codigo_lido;
+          const produto = Array.isArray(item.produtos)
+            ? item.produtos[0]
+            : item.produtos;
+
+          if (!agrupados.has(codigo)) {
+            agrupados.set(codigo, {
+              codigo,
+              descricao:
+                produto?.descricao || "Código não cadastrado",
+              quantidade: 0,
+              conhecido: item.codigo_conhecido
+            });
+          }
+
+          agrupados.get(codigo).quantidade +=
+            Number(item.quantidade_contada);
+        }
+
+        const lista = el("lista-contagem");
+        lista.replaceChildren();
+
+        let totalUnidades = 0;
+        let totalPendencias = 0;
+
+        for (const item of agrupados.values()) {
+          totalUnidades += item.quantidade;
+
+          if (!item.conhecido) {
+            totalPendencias += item.quantidade;
+          }
+
+          const linha = document.createElement("div");
+          linha.className = "lista-item";
+
+          const informacoes = document.createElement("span");
+          const descricao = document.createElement("span");
+          descricao.textContent = item.descricao;
+
+          const codigo = document.createElement("small");
+          codigo.textContent = item.codigo;
+
+          informacoes.append(
+            descricao,
+            document.createElement("br"),
+            codigo
+          );
+
+          const quantidade = document.createElement("span");
+          quantidade.className = "contador";
+          quantidade.textContent = String(item.quantidade);
+
+          linha.append(informacoes, quantidade);
+          lista.append(linha);
+        }
+
+        if (!agrupados.size) {
+          const vazio = document.createElement("p");
+          vazio.className = "ajuda";
+          vazio.textContent = "Nenhum item contado ainda.";
+          lista.append(vazio);
+        }
+
+        el("resumo-itens-compacto").textContent =
+          `${totalUnidades} unidade(s) · ${agrupados.size} código(s) · ${totalPendencias} unidade(s) pendente(s)`;
+
+        el("resumo-contagem").textContent =
+          `Unidades contadas: ${totalUnidades} | ` +
+          `Códigos distintos: ${agrupados.size} | ` +
+          `Unidades com código desconhecido: ${totalPendencias}`;
+      }
+
+      // FINALIZAR
+      el("botao-finalizar-contagem").addEventListener("click", async () => {
+        if (
+          !contagemAtual ||
+          registrandoLeitura ||
+          finalizandoContagem
+        ) {
+          return;
+        }
+
+        if (!window.confirm(
+          "Finalizar esta contagem? Ela não aceitará novas leituras."
+        )) {
+          return;
+        }
+
+        const mensagem = el("mensagem-contagem");
+        const botao = el("botao-finalizar-contagem");
+
+        finalizandoContagem = true;
+        leituraArmada = false;
+        botao.textContent = "Finalizando...";
+        atualizarControles();
+
+        try {
+          await pararCamera();
+
+          const { error } = await exigirConexao().rpc(
+            "finalizar_contagem",
+            {
+              p_contagem_id: contagemAtual.id
+            }
+          );
+
+          if (error) throw error;
+
+          const nome = contagemAtual.nome;
+          const contagemFinalizadaId = contagemAtual.id;
+
+          contagemAtual = null;
+          el("form-contagem").reset();
+
+          exibirMensagem(
+            mensagem,
+            `Contagem "${nome}" finalizada. ` +
+            "Os resultados foram gerados no banco.",
+            "sucesso"
+          );
+          mostrarTela("relatorios");
+          await carregarHistoricoRelatorios(contagemFinalizadaId);
+        } catch (erro) {
+          registrarErro(
+            mensagem,
+            "Não foi possível confirmar a finalização",
+            erro
+          );
+        } finally {
+          finalizandoContagem = false;
+          botao.textContent = "Finalizar contagem";
+          atualizarPainelContagem();
+        }
+      });
+
+      // NÃO PERDER UMA CONTAGEM ABERTA SEM AVISO
+      window.addEventListener("beforeunload", (evento) => {
+        if (!contagemAtual && !registrandoLeitura && !leituraPendente) return;
+
+        evento.preventDefault();
+        evento.returnValue = "";
+      });
+
+      // ERROS NÃO TRATADOS
+      window.addEventListener("error", (evento) => {
+        if (!evento.message) return;
+
+        console.error("Erro JavaScript:", evento.error || evento.message);
+
+        exibirMensagem(
+          el("mensagem-global"),
+          "Erro no sistema: " + evento.message,
+          "erro"
+        );
+      });
+
+      window.addEventListener("unhandledrejection", (evento) => {
+        console.error("Operação não tratada:", evento.reason);
+
+        exibirMensagem(
+          el("mensagem-global"),
+          "Erro inesperado: " + detalheErro(evento.reason),
+          "erro"
+        );
+      });
+
+      // CONEXÃO E RESTAURAÇÃO DA SESSÃO
+      async function inicializar() {
+        el("botao-login").disabled = true;
+
+        exibirMensagem(
+          el("mensagem-login"),
+          "Inicializando conexão...",
+          "info"
+        );
+
+        try {
+          if (!window.supabase?.createClient) {
+            throw new Error(
+              "A biblioteca Supabase não carregou. " +
+              "Verifique sua internet ou bloqueios de scripts externos."
+            );
+          }
+
+          db = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLIC_KEY,
+            {
+              auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                storageKey: CHAVE_SESSAO,
+                storage: armazenamentoAuth
+              }
+            }
+          );
+
+          db.auth.onAuthStateChange((evento, sessao) => {
+            const usuarioAnterior = usuarioAtual?.id;
+            usuarioAtual = sessao?.user || null;
+
+            if (usuarioAtual) {
+              if (usuarioAnterior && usuarioAnterior !== usuarioAtual.id) {
+                limparNomeUsuario();
+                invalidarRelatorios();
+              }
+              agendarCarregamentoNome(usuarioAtual);
+
+              // Renovar o token não deve tirar o usuário da tela atual.
+              if (
+                evento === "SIGNED_IN" &&
+                usuarioAnterior !== usuarioAtual.id
+              ) {
+                mostrarTela("menu");
+              }
+            } else if (evento === "SIGNED_OUT") {
+              limparNomeUsuario();
+              invalidarRelatorios();
+              leituraPendente = null;
+              if (el("modal-produto").open) el("modal-produto").close();
+              if (el("modal-leitura").open) el("modal-leitura").close();
+              contagemAtual = null;
+              atualizarPainelContagem();
+              mostrarTela("login");
+
+              // Não aguarda operações assíncronas dentro do callback.
+              setTimeout(() => {
+                pararCamera().catch((erro) => {
+                  console.warn("Erro ao encerrar câmera:", erro);
+                });
+              }, 0);
+            }
+          });
+
+          const { data, error } = await db.auth.getSession();
+
+          if (error) throw error;
+
+          if (data.session) {
+            usuarioAtual = data.session.user;
+
+            await carregarNomeUsuario(usuarioAtual);
+
+            mostrarTela("menu");
+            limparMensagem(el("mensagem-login"));
+          } else {
+            mostrarTela("login");
+
+            exibirMensagem(
+              el("mensagem-login"),
+              "Informe o e-mail e a senha do usuário cadastrado no Supabase.",
+              "info"
+            );
+          }
+        } catch (erro) {
+          registrarErro(
+            el("mensagem-login"),
+            "Erro ao inicializar",
+            erro
+          );
+        } finally {
+          el("botao-login").disabled = false;
+          atualizarPainelContagem();
+        }
+      }
+
+
+      let leituraPendente = null;
+      let categoriasAtivas = [];
+      let salvandoModal = false;
+
+      async function carregarCategorias() {
+        const lista = [];
+        let inicio = 0;
+        while (true) {
+          const { data, error } = await exigirConexao().from("categorias")
+            .select("id,nome").eq("ativo", true).order("nome").order("id")
+            .range(inicio, inicio + 499);
+          if (error) throw error;
+          if (!data?.length) break;
+          lista.push(...data);
+          inicio += data.length;
+        }
+        categoriasAtivas = lista;
+        for (const id of ["cadastro-categoria", "modal-categoria"]) {
+          const seletor = el(id);
+          const anterior = seletor.value;
+          seletor.replaceChildren();
+          const inicial = document.createElement("option");
+          inicial.value = "";
+          inicial.textContent = lista.length ? "Selecione uma categoria" : "Nenhuma categoria ativa";
+          seletor.append(inicial);
+          for (const categoria of lista) {
+            const opcao = document.createElement("option");
+            opcao.value = categoria.nome;
+            opcao.textContent = categoria.nome;
+            seletor.append(opcao);
+          }
+          if (lista.some((c) => c.nome === anterior)) seletor.value = anterior;
+        }
+        atualizarCampoAutor("cadastro");
+        atualizarCampoAutor("modal");
+      }
+
+      function novoIdRequisicao() {
+        if (crypto.randomUUID) return crypto.randomUUID();
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        bytes[6] = (bytes[6] & 15) | 64;
+        bytes[8] = (bytes[8] & 63) | 128;
+        const hex = [...bytes].map((b) => b.toString(16).padStart(2,"0")).join("");
+        return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+      }
+
+      function atualizarModalLeitura() {
+        if (!leituraPendente) return;
+        const pendente = leituraPendente;
+        el("leitura-descricao").textContent = pendente.produto?.descricao || "Código não cadastrado";
+        el("leitura-codigo").textContent = `Código: ${pendente.codigo}`;
+        el("pergunta-cadastro").classList.toggle("hidden", pendente.decidido || Boolean(pendente.produto));
+        el("form-quantidade").classList.toggle("hidden", !pendente.decidido && !pendente.produto);
+        el("leitura-quantidade").disabled = Boolean(pendente.enviado);
+        el("cancelar-leitura").disabled = Boolean(pendente.enviado) || registrandoLeitura;
+        el("confirmar-quantidade").disabled = registrandoLeitura;
+        el("confirmar-quantidade").textContent = registrandoLeitura
+          ? "Registrando..." : pendente.enviado
+          ? "Verificar / repetir confirmação com segurança"
+          : "Confirmar quantidade";
+      }
+
+      async function registrarLeitura(codigo) {
+        if (leituraPendente || registrandoLeitura || finalizandoContagem) return false;
+        const valor = String(codigo).trim();
+        if (!contagemAtual || !valor) return false;
+        registrandoLeitura = true;
+        leituraArmada = false;
+        atualizarControles();
+        try {
+          const { data, error } = await exigirConexao().from("produtos")
+            .select("id,descricao,ativo").eq("codigo_barras", valor).maybeSingle();
+          if (error) throw error;
+          if (data && !data.ativo) throw new Error("Este produto está inativo. Reative o cadastro antes de contar.");
+          leituraPendente = {
+            codigo: valor, produto: data, decidido: Boolean(data),
+            contagemId: contagemAtual.id, requisicaoId: novoIdRequisicao(),
+            enviado: false, quantidade: null
+          };
+          el("leitura-quantidade").value = "1";
+          limparMensagem(el("mensagem-quantidade"));
+          atualizarModalLeitura();
+          el("modal-leitura").showModal();
+          return true;
+        } catch (erro) {
+          registrarErro(el("resultado-leitura"), "Erro ao preparar leitura", erro);
+          leituraPendente = null;
+          prepararRetomadaAutomatica(valor);
+          return false;
+        } finally {
+          registrandoLeitura = false;
+          atualizarControles();
+          atualizarModalLeitura();
+        }
+      }
+
+      el("nao-cadastrar").addEventListener("click", () => {
+        if (!leituraPendente) return;
+        leituraPendente.decidido = true;
+        atualizarModalLeitura();
+        el("leitura-quantidade").focus();
+      });
+
+      el("sim-cadastrar").addEventListener("click", async () => {
+        if (!leituraPendente || salvandoModal) return;
+        el("form-produto-modal").reset();
+        el("modal-codigo").value = leituraPendente.codigo;
+        limparMensagem(el("mensagem-produto-modal"));
+        el("modal-produto").showModal();
+        try { await carregarCategorias(); }
+        catch (erro) { registrarErro(el("mensagem-produto-modal"), "Erro ao carregar categorias", erro); }
+      });
+
+      el("cancelar-produto-modal").addEventListener("click", () => {
+        if (!salvandoModal) el("modal-produto").close();
+      });
+      el("modal-produto").addEventListener("cancel", (evento) => {
+        if (salvandoModal) evento.preventDefault();
+      });
+
+      el("form-produto-modal").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        if (!leituraPendente || salvandoModal) return;
+        const estoque = Number(el("modal-estoque").value);
+        const descricao = el("modal-descricao").value.trim();
+        const categoria = el("modal-categoria").value;
+        const mensagem = el("mensagem-produto-modal");
+        if (!descricao || !categoria || !Number.isSafeInteger(estoque) || estoque < 0 || estoque > 2147483647) {
+          exibirMensagem(mensagem, "Preencha descrição, categoria e uma quantidade prevista válida.", "erro");
+          return;
+        }
+        salvandoModal = true;
+        el("salvar-produto-modal").disabled = true;
+        el("cancelar-produto-modal").disabled = true;
+        try {
+          const usuario = await obterUsuario();
+          const { data, error } = await db.from("produtos").insert({
+            codigo_barras: leituraPendente.codigo, descricao, categoria,
+            autor: categoriaEhLivros(categoria) ? (el("modal-autor").value.trim() || null) : null,
+            quantidade_sistema: estoque, criado_por: usuario.id
+          }).select("id,descricao,ativo").single();
+          let produto = data;
+          if (error) {
+            // Também permite recuperar um cadastro salvo cuja resposta se perdeu.
+            if (error.code !== "23505") throw error;
+            const retorno = await db.from("produtos").select("id,descricao,ativo")
+              .eq("codigo_barras", leituraPendente.codigo).single();
+            if (retorno.error) throw retorno.error;
+            if (!retorno.data.ativo) throw new Error("Já existe um cadastro inativo para este código.");
+            produto = retorno.data;
+          }
+          leituraPendente.produto = produto;
+          leituraPendente.decidido = true;
+          el("modal-produto").close();
+          atualizarModalLeitura();
+          exibirMensagem(el("mensagem-quantidade"),
+            "Cadastro disponível. Confira a quantidade física e confirme para registrar.", "sucesso");
+        } catch (erro) {
+          registrarErro(mensagem, "Erro ao cadastrar item", erro);
+        } finally {
+          salvandoModal = false;
+          el("salvar-produto-modal").disabled = false;
+          el("cancelar-produto-modal").disabled = false;
+        }
+      });
+
+      function cancelarLeituraPendente() {
+        if (registrandoLeitura || leituraPendente?.enviado) return;
+        const codigoCancelado = leituraPendente?.codigo || "";
+        leituraPendente = null;
+        el("modal-leitura").close();
+        prepararRetomadaAutomatica(codigoCancelado);
+        exibirMensagem(el("resultado-leitura"), "Leitura cancelada. Nenhuma unidade foi adicionada. A câmera será liberada automaticamente.", "info");
+        atualizarControles();
+      }
+      el("cancelar-leitura").addEventListener("click", cancelarLeituraPendente);
+      el("modal-leitura").addEventListener("cancel", (evento) => {
+        evento.preventDefault();
+        cancelarLeituraPendente();
+      });
+
+      el("form-quantidade").addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        void prepararAudio();
+        if (!leituraPendente || registrandoLeitura) return;
+        const pendente = leituraPendente;
+        const qtd = pendente.enviado ? pendente.quantidade : Number(el("leitura-quantidade").value);
+        if (!Number.isSafeInteger(qtd) || qtd < 1 || qtd > 2147483647) {
+          exibirMensagem(el("mensagem-quantidade"), "Informe uma quantidade inteira positiva válida.", "erro");
+          return;
+        }
+        pendente.quantidade = qtd;
+        pendente.enviado = true;
+        registrandoLeitura = true;
+        atualizarModalLeitura();
+        atualizarControles();
+        try {
+          const { data, error } = await exigirConexao().rpc("registrar_quantidade", {
+            p_contagem_id: pendente.contagemId, p_codigo_lido: pendente.codigo,
+            p_quantidade: qtd, p_requisicao_id: pendente.requisicaoId
+          });
+          if (error) throw error;
+          if (!data || !["sucesso", "codigo_desconhecido"].includes(data.status)) {
+            throw new Error("Resposta inesperada do banco.");
+          }
+          tocarSomConfirmacao();
+          leituraPendente = null;
+          el("modal-leitura").close();
+          exibirMensagem(el("resultado-leitura"),
+            `${pendente.produto?.descricao || "Código não cadastrado"}\n` +
+            `Adicionado: ${qtd} un. | Total deste código: ${data.quantidade} un.\n` +
+            "Posicione o próximo item. A câmera será liberada automaticamente.",
+            data.status === "sucesso" ? "sucesso" : "aviso");
+          try { await carregarItensContagem(); }
+          catch (erro) { registrarErro(el("mensagem-contagem"), "Quantidade salva, mas a lista não atualizou", erro); }
+          // A confirmação foi salva; libera automaticamente após uma breve pausa.
+          prepararRetomadaAutomatica(pendente.codigo);
+        } catch (erro) {
+          registrarErro(el("mensagem-quantidade"),
+            "Não foi possível confirmar. Tente novamente com o mesmo botão; a identificação da requisição foi mantida para evitar duplicidade", erro);
+        } finally {
+          registrandoLeitura = false;
+          atualizarModalLeitura();
+          atualizarControles();
+        }
+      });
+
+
+      let historicoRelatorios = [];
+      let itensRelatorio = [];
+      let contagemRelatorio = null;
+      let carregandoRelatorios = false;
+      let versaoRelatorio = 0;
+      const rotulosSituacao = { correto:"Correto", faltante:"Faltante", excedente:"Excedente", nao_cadastrado:"Não cadastrado" };
+      const dataRelatorio = (v) => v ? new Date(v).toLocaleString("pt-BR") : "Não informado";
+      const textoBuscaRelatorio = (v) => String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+      async function paginasRelatorio(criar, validar = () => true) {
+        let inicio = 0;
+        const linhas = [];
+        while (true) {
+          if (!validar()) throw new Error("Consulta cancelada.");
+          const { data, error } = await criar().range(inicio,inicio+499);
+          if (error) throw error;
+          if (!validar()) throw new Error("Consulta cancelada.");
+          if (!data?.length) break;
+          linhas.push(...data);
+          inicio += data.length;
+        }
+        return linhas;
+      }
+      function itensFiltradosRelatorio() {
+        const filtro = el("relatorio-filtro").value;
+        const busca = textoBuscaRelatorio(el("relatorio-busca").value.trim());
+        return itensRelatorio.filter((i) => (filtro === "todos" || filtro === i.situacao) &&
+          (!busca || textoBuscaRelatorio(`${i.codigo} ${i.descricao}`).includes(busca)));
+      }
+      function controlesRelatorio() {
+        el("relatorio-contagem").disabled = carregandoRelatorios;
+        el("botao-atualizar-relatorios").disabled = carregandoRelatorios;
+        el("botao-exportar-relatorio").disabled = carregandoRelatorios || !contagemRelatorio || !itensFiltradosRelatorio().length;
+      }
+      function limparDadosRelatorio() {
+        contagemRelatorio = null;
+        itensRelatorio = [];
+        el("painel-relatorio").classList.add("hidden");
+        el("relatorio-corpo").replaceChildren();
+        controlesRelatorio();
+      }
+      function invalidarRelatorios() {
+        versaoRelatorio++;
+        carregandoRelatorios = false;
+        historicoRelatorios = [];
+        el("relatorio-contagem").replaceChildren();
+        limparDadosRelatorio();
+      }
+      async function carregarHistoricoRelatorios(selecionar = null) {
+        if (carregandoRelatorios) return;
+        const versao = ++versaoRelatorio;
+        const usuario = usuarioAtual?.id;
+        const validar = () => versao === versaoRelatorio && Boolean(usuario) && usuarioAtual?.id === usuario;
+        carregandoRelatorios = true;
+        limparDadosRelatorio();
+        controlesRelatorio();
+        exibirMensagem(el("mensagem-relatorios"),"Carregando histórico...","info");
+        let abrir = false;
+        try {
+          if (!usuario) throw new Error("Entre novamente.");
+          const dados = await paginasRelatorio(() => exigirConexao().from("contagens")
+            .select("id,nome,data_inicio,data_fechamento").eq("status","finalizada")
+            .order("data_fechamento",{ascending:false}).order("id"), validar);
+          if (!validar()) return;
+          historicoRelatorios = dados;
+          const seletor = el("relatorio-contagem");
+          seletor.replaceChildren();
+          const inicial = document.createElement("option");
+          inicial.value = ""; inicial.textContent = dados.length ? "Selecione uma contagem" : "Nenhuma contagem finalizada";
+          seletor.append(inicial);
+          for (const item of dados) {
+            const opcao = document.createElement("option");
+            opcao.value = item.id;
+            opcao.textContent = `${item.nome} — ${dataRelatorio(item.data_fechamento)}`;
+            seletor.append(opcao);
+          }
+          if (!dados.length) exibirMensagem(el("mensagem-relatorios"),"Nenhuma contagem finalizada disponível.","aviso");
+          else limparMensagem(el("mensagem-relatorios"));
+          if (selecionar && dados.some((i) => i.id === selecionar)) {
+            seletor.value = selecionar; abrir = true;
+          }
+        } catch (erro) {
+          if (validar()) registrarErro(el("mensagem-relatorios"),"Erro ao carregar histórico",erro);
+        } finally {
+          if (versao === versaoRelatorio) { carregandoRelatorios=false; controlesRelatorio(); }
+        }
+        if (abrir && validar()) await carregarRelatorio(selecionar);
+      }
+      async function carregarRelatorio(id) {
+        if (carregandoRelatorios) return;
+        const versao = ++versaoRelatorio;
+        const usuario = usuarioAtual?.id;
+        const validar = () => versao === versaoRelatorio && Boolean(usuario) && usuarioAtual?.id === usuario;
+        limparDadosRelatorio();
+        if (!id) { limparMensagem(el("mensagem-relatorios")); return; }
+        const contagem = historicoRelatorios.find((i) => i.id === id);
+        if (!contagem) return;
+        carregandoRelatorios=true; controlesRelatorio();
+        exibirMensagem(el("mensagem-relatorios"),"Carregando relatório...","info");
+        try {
+          const [resultados, pendencias] = await Promise.all([
+            paginasRelatorio(() => exigirConexao().from("contagem_resultados")
+              .select("id,quantidade_sistema,quantidade_contada,diferenca,status,produtos(codigo_barras,descricao)")
+              .eq("contagem_id",id).order("id"), validar),
+            paginasRelatorio(() => exigirConexao().from("contagem_itens")
+              .select("id,codigo_lido,quantidade_contada").eq("contagem_id",id)
+              .eq("codigo_conhecido",false).order("id"), validar)
+          ]);
+          if (!validar()) return;
+          const linhas = resultados.map((r) => {
+            const p=Array.isArray(r.produtos) ? r.produtos[0] : r.produtos;
+            return {codigo:p?.codigo_barras || "",descricao:p?.descricao || "Produto indisponível",
+              previsto:Number(r.quantidade_sistema),
+              contado:Number(r.quantidade_contada),diferenca:Number(r.diferenca),situacao:r.status};
+          });
+          const desconhecidos = new Map();
+          for (const p of pendencias) {
+            if (!desconhecidos.has(p.codigo_lido)) desconhecidos.set(p.codigo_lido,{
+              codigo:p.codigo_lido,descricao:"Código não cadastrado na contagem",
+              previsto:null,contado:0,diferenca:null,situacao:"nao_cadastrado"});
+            desconhecidos.get(p.codigo_lido).contado += Number(p.quantidade_contada);
+          }
+          const ordem={faltante:0,excedente:1,nao_cadastrado:2,correto:3};
+          itensRelatorio=[...linhas,...desconhecidos.values()].sort((a,b) =>
+            ((ordem[a.situacao]??9)-(ordem[b.situacao]??9)) || a.descricao.localeCompare(b.descricao,"pt-BR") || a.codigo.localeCompare(b.codigo));
+          contagemRelatorio=contagem;
+          el("relatorio-filtro").value="todos"; el("relatorio-busca").value="";
+          const t={previsto:0,contado:0,faltantes:0,excedentes:0,corretos:0,desconhecidos:0};
+          for(const i of itensRelatorio) {
+            if(i.situacao==="nao_cadastrado") {t.desconhecidos+=i.contado;continue;}
+            t.previsto+=i.previsto; t.contado+=i.contado;
+            t.faltantes+=Math.max(0,-i.diferenca); t.excedentes+=Math.max(0,i.diferenca);
+            if(i.situacao==="correto") t.corretos++;
+          }
+          for(const [k,v] of Object.entries(t)) el(`relatorio-${k}`).textContent=String(v);
+          el("relatorio-titulo").textContent=contagem.nome;
+          el("relatorio-metadados").textContent=`Início: ${dataRelatorio(contagem.data_inicio)}\nFechamento: ${dataRelatorio(contagem.data_fechamento)}\nID: ${contagem.id}`;
+          renderizarRelatorio();
+          el("painel-relatorio").classList.remove("hidden");
+          if (!resultados.length) exibirMensagem(el("mensagem-relatorios"),"Não há resultados de produtos cadastrados. Eventuais pendências estão abaixo.","aviso");
+          else limparMensagem(el("mensagem-relatorios"));
+        } catch(erro) {
+          if(validar()) registrarErro(el("mensagem-relatorios"),"Erro ao consultar relatório",erro);
+        } finally {
+          if(versao===versaoRelatorio) { carregandoRelatorios=false;controlesRelatorio(); }
+        }
+      }
+      function renderizarRelatorio() {
+        const itens=itensFiltradosRelatorio();
+        const fragmento=document.createDocumentFragment();
+        let unidades=0;
+        for(const i of itens) {
+          unidades+=i.contado;
+          const tr=document.createElement("tr");
+          const td=document.createElement("td");
+          const desc=document.createElement("span");desc.textContent=i.descricao;td.append(desc);
+          for(const texto of [i.codigo].filter(Boolean)) {
+            const small=document.createElement("small");small.textContent=texto;td.append(small);
+          }
+          tr.append(td);
+          for(const valor of [i.previsto,i.contado,i.diferenca===null?null:i.diferenca>0?`+${i.diferenca}`:i.diferenca,rotulosSituacao[i.situacao]||i.situacao]) {
+            const cel=document.createElement("td");cel.textContent=valor===null?"—":String(valor);tr.append(cel);
+          }
+          fragmento.append(tr);
+        }
+        if(!itens.length) {
+          const tr=document.createElement("tr");const td=document.createElement("td");td.colSpan=5;
+          td.textContent="Nenhum item encontrado para estes filtros.";tr.append(td);fragmento.append(tr);
+        }
+        el("relatorio-corpo").replaceChildren(fragmento);
+        el("relatorio-total-exibido").textContent=`${itens.length} código(s) de ${itensRelatorio.length}. Unidades contadas exibidas: ${unidades}.`;
+        controlesRelatorio();
+      }
+      function campoCSV(valor,texto=false) {
+        if(valor===null||valor===undefined) return '""';
+        if(typeof valor==="number"&&Number.isFinite(valor))return String(valor);
+        let v=String(valor);
+        if(texto||/^[\s\u0000-\u001f]*[=+\-@]/u.test(v)||/^[\t\r\n\u0000]/u.test(v))v="'"+v;
+        return '"'+v.replace(/"/g,'""')+'"';
+      }
+      function exportarRelatorio() {
+        try {
+          const itens=itensFiltradosRelatorio();
+          if(!contagemRelatorio||!itens.length||carregandoRelatorios)throw new Error("Selecione um relatório com itens.");
+          const cab=["Contagem","ID","Início","Fechamento","Código de barras","Descrição","Previsto","Contado","Diferença","Situação"];
+          const linhas=[cab.map((v)=>campoCSV(v)).join(";")];
+          for(const i of itens)linhas.push([contagemRelatorio.nome,contagemRelatorio.id,
+            dataRelatorio(contagemRelatorio.data_inicio),dataRelatorio(contagemRelatorio.data_fechamento),
+            i.codigo,i.descricao,i.previsto,i.contado,i.diferenca,rotulosSituacao[i.situacao]||i.situacao]
+            .map((v,k)=>campoCSV(v,k===4)).join(";"));
+          const blob=new Blob(["\uFEFF"+linhas.join("\r\n")],{type:"text/csv;charset=utf-8;"});
+          const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;
+          const nome=textoBuscaRelatorio(contagemRelatorio.nome).replace(/[^a-z0-9_-]+/g,"-").slice(0,70)||"contagem";
+          a.download=`relatorio-${nome}-${el("relatorio-filtro").value}.csv`;
+          document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+        }catch(erro){registrarErro(el("mensagem-relatorios"),"Erro ao exportar",erro);}
+      }
+      el("botao-ir-relatorios").addEventListener("click",async()=>{mostrarTela("relatorios");await carregarHistoricoRelatorios();});
+      el("botao-voltar-relatorios").addEventListener("click",()=>mostrarTela("menu"));
+      el("botao-atualizar-relatorios").addEventListener("click",async()=>{await carregarHistoricoRelatorios(el("relatorio-contagem").value||null);});
+      el("relatorio-contagem").addEventListener("change",async()=>{await carregarRelatorio(el("relatorio-contagem").value);});
+      el("relatorio-filtro").addEventListener("change",renderizarRelatorio);
+      el("relatorio-busca").addEventListener("input",renderizarRelatorio);
+      el("botao-exportar-relatorio").addEventListener("click",exportarRelatorio);
+
+
+      function categoriaEhLivros(valor) {
+        return String(valor || "").trim().toLocaleLowerCase("pt-BR") === "livros";
+      }
+      function atualizarCampoAutor(prefixo) {
+        const visivel = categoriaEhLivros(el(`${prefixo}-categoria`).value);
+        el(`grupo-${prefixo}-autor`).classList.toggle("hidden", !visivel);
+        const campo = el(`${prefixo}-autor`);
+        campo.disabled = !visivel;
+        if (!visivel) campo.value = "";
+      }
+      for (const prefixo of ["cadastro", "modal"]) {
+        el(`${prefixo}-categoria`).addEventListener("change", () => atualizarCampoAutor(prefixo));
+      }
+      el("form-produto").addEventListener("reset", () => {
+        setTimeout(() => atualizarCampoAutor("cadastro"), 0);
+      });
+      el("form-produto-modal").addEventListener("reset", () => {
+        setTimeout(() => atualizarCampoAutor("modal"), 0);
+      });
+
+      let temporizadorProximaLeitura = null;
+      let codigoEmIntervalo = "";
+      let codigoBloqueadoAte = 0;
+      const PAUSA_ENTRE_LEITURAS_MS = 900;
+      const INTERVALO_MESMO_CODIGO_MS = 2500;
+
+      function cancelarRetomadaAutomatica() {
+        clearTimeout(temporizadorProximaLeitura);
+        temporizadorProximaLeitura = null;
+      }
+      function prepararRetomadaAutomatica(codigo = "") {
+        cancelarRetomadaAutomatica();
+        leituraArmada = false;
+        if (codigo) {
+          codigoEmIntervalo = String(codigo).trim();
+          codigoBloqueadoAte = Date.now() + INTERVALO_MESMO_CODIGO_MS;
+        }
+        if (tipoScanner !== "contagem" || !scanner?.isScanning || !contagemAtual) return;
+        el("card-codigo-manual").open = false;
+        centralizarCameraNaTela();
+        temporizadorProximaLeitura = setTimeout(() => {
+          temporizadorProximaLeitura = null;
+          if (tipoScanner === "contagem" && scanner?.isScanning && contagemAtual &&
+              !leituraPendente && !registrandoLeitura && !finalizandoContagem &&
+              !parandoCamera && !abrindoCamera &&
+              !telas.contagem.classList.contains("hidden")) {
+            leituraArmada = true;
+            atualizarControles();
+          }
+        }, PAUSA_ENTRE_LEITURAS_MS);
+      }
+
+      atualizarCampoAutor("cadastro");
+      atualizarCampoAutor("modal");
+
+      let temporizadorCentralizarCamera = null;
+      function centralizarCameraNaTela() {
+        clearTimeout(temporizadorCentralizarCamera);
+        if (tipoScanner !== "contagem" || !scanner?.isScanning || !contagemAtual) return;
+        const ativo = document.activeElement;
+        if (ativo && typeof ativo.blur === "function" && ativo.matches?.("input,select,textarea")) ativo.blur();
+        temporizadorCentralizarCamera = setTimeout(() => {
+          temporizadorCentralizarCamera = null;
+          if (tipoScanner !== "contagem" || !scanner?.isScanning || !contagemAtual ||
+              leituraPendente || el("modal-leitura").open || el("modal-produto").open ||
+              telas.contagem.classList.contains("hidden")) return;
+          const camera = el("reader-contagem");
+          if (!camera.getClientRects().length) return;
+          camera.focus({ preventScroll: true });
+          const reduzir = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+          camera.scrollIntoView({ behavior: reduzir ? "auto" : "smooth", block: "center", inline: "nearest" });
+        }, 320);
+      }
+
+
+      // Preferência de sessão: tokens do Auth, nunca a senha do formulário.
+      const CHAVE_LEMBRAR = "inventariei.lembrar-login";
+      const CHAVE_EMAIL = "inventariei.email-lembrado";
+      const CHAVE_SESSAO = "inventariei.auth.v2";
+      const memoriaAuth = new Map();
+      function lerPreferencia(chave) {
+        try { return window.localStorage.getItem(chave); }
+        catch (_) { return null; }
+      }
+      function escreverPreferencia(chave, valor) {
+        try {
+          if (valor === null) window.localStorage.removeItem(chave);
+          else window.localStorage.setItem(chave, valor);
+          return true;
+        } catch (erro) {
+          console.warn("Armazenamento de preferências indisponível:", erro);
+          return false;
+        }
+      }
+      let lembrarSessao = lerPreferencia(CHAVE_LEMBRAR) === "true";
+      const armazenamentoAuth = {
+        getItem(chave) {
+          const modo = lembrarSessao ? "local" : "sessao";
+          try {
+            const storage = lembrarSessao ? window.localStorage : window.sessionStorage;
+            return storage.getItem(chave) ?? memoriaAuth.get(`${modo}:${chave}`) ?? null;
+          } catch (_) { return memoriaAuth.get(`${modo}:${chave}`) ?? null; }
+        },
+        setItem(chave, valor) {
+          const modo = lembrarSessao ? "local" : "sessao";
+          memoriaAuth.set(`${modo}:${chave}`, valor);
+          memoriaAuth.delete(`${lembrarSessao ? "sessao" : "local"}:${chave}`);
+          try {
+            const storage = lembrarSessao ? window.localStorage : window.sessionStorage;
+            const outro = lembrarSessao ? window.sessionStorage : window.localStorage;
+            storage.setItem(chave, valor);
+            outro.removeItem(chave);
+          } catch (erro) { console.warn("Sessão disponível somente em memória:", erro); }
+        },
+        removeItem(chave) {
+          memoriaAuth.delete(`local:${chave}`);
+          memoriaAuth.delete(`sessao:${chave}`);
+          try { window.localStorage.removeItem(chave); } catch (_) {}
+          try { window.sessionStorage.removeItem(chave); } catch (_) {}
+        }
+      };
+      function configurarPreferenciaLogin(email) {
+        lembrarSessao = el("lembrar-login").checked;
+        escreverPreferencia(CHAVE_LEMBRAR, String(lembrarSessao));
+        escreverPreferencia(CHAVE_EMAIL, lembrarSessao ? email : null);
+      }
+
+      let perfilNomeUsuarioId = null;
+      let consultaNomeEmAndamento = null;
+      let versaoNomePerfil = 0;
+      function limparNomeUsuario() {
+        versaoNomePerfil += 1;
+        perfilNomeUsuarioId = null;
+        consultaNomeEmAndamento = null;
+        el("usuario-logado").textContent = "Usuário";
+        el("usuario-logado").removeAttribute("title");
+      }
+      function nomeAlternativoUsuario(usuario) {
+        const metadados = usuario?.user_metadata || {};
+        for (const valor of [metadados.nome, metadados.full_name, metadados.name]) {
+          if (typeof valor === "string" && valor.trim()) return valor.trim();
+        }
+        return "Usuário";
+      }
+      async function carregarNomeUsuario(usuario) {
+        if (!usuario?.id || usuarioAtual?.id !== usuario.id) return;
+        if (perfilNomeUsuarioId === usuario.id) return;
+        if (consultaNomeEmAndamento?.id === usuario.id) return consultaNomeEmAndamento.promessa;
+        const versao = versaoNomePerfil;
+        el("usuario-logado").textContent = "Carregando perfil...";
+        const promessa = (async () => {
+          try {
+            const { data, error } = await exigirConexao().from("perfis")
+              .select("nome").eq("id", usuario.id).maybeSingle();
+            if (error) throw error;
+            if (usuarioAtual?.id !== usuario.id || versao !== versaoNomePerfil) return;
+            const nome = typeof data?.nome === "string" ? data.nome.trim() : "";
+            el("usuario-logado").textContent = nome || nomeAlternativoUsuario(usuario);
+            if (!nome) el("usuario-logado").title = "Nome não encontrado em perfis.nome.";
+            else el("usuario-logado").removeAttribute("title");
+            perfilNomeUsuarioId = usuario.id;
+          } catch (erro) {
+            if (usuarioAtual?.id !== usuario.id || versao !== versaoNomePerfil) return;
+            console.warn("Não foi possível consultar perfis.nome:", erro);
+            el("usuario-logado").textContent = nomeAlternativoUsuario(usuario);
+            el("usuario-logado").title = "Não foi possível carregar o nome do perfil.";
+          } finally {
+            if (versao === versaoNomePerfil && consultaNomeEmAndamento?.id === usuario.id) {
+              consultaNomeEmAndamento = null;
+            }
+          }
+        })();
+        consultaNomeEmAndamento = { id: usuario.id, promessa };
+        return promessa;
+      }
+      function agendarCarregamentoNome(usuario) {
+        // Não consulta o banco dentro do callback síncrono de autenticação.
+        setTimeout(() => { void carregarNomeUsuario(usuario); }, 0);
+      }
+
+      el("lembrar-login").checked = lembrarSessao;
+      if (lembrarSessao) el("login-email").value = lerPreferencia(CHAVE_EMAIL) || "";
+
+      // Navegação 1a: uma única estrutura para barra inferior e lateral.
+      let telaNavegacao1a = "login";
+      let navegacaoEmAndamento1a = false;
+
+      function atualizarNavegacao1a(nome) {
+        telaNavegacao1a = nome;
+        const autenticado = nome !== "login" && Boolean(usuarioAtual);
+        document.body.dataset.ivAuth = String(autenticado);
+        el("navegacao-principal").hidden = !autenticado;
+        document.querySelectorAll("[data-iv-link]").forEach((botao) => {
+          const ativo = botao.dataset.ivRoute === nome;
+          botao.classList.toggle("is-active", ativo);
+          if (ativo) botao.setAttribute("aria-current", "page");
+          else botao.removeAttribute("aria-current");
+        });
+        atualizarIndicadorContagem1a();
+        sincronizarConta1a();
+      }
+
+      function atualizarIndicadorContagem1a() {
+        const ativa = Boolean(contagemAtual);
+        el("nav-contagem-ativa").hidden = !ativa;
+        const botao = document.querySelector('[data-iv-link][data-iv-route="contagem"]');
+        if (botao) botao.setAttribute("aria-label", ativa ? "Contar: contagem em andamento" : "Contar: iniciar contagem");
+      }
+
+      function sincronizarConta1a() {
+        const nome = el("usuario-logado").textContent.trim() || "Usuário";
+        document.querySelectorAll("[data-iv-name]").forEach((item) => { item.textContent = nome; });
+        const partes = nome.split(/\s+/u).filter(Boolean);
+        const iniciais = (partes[0]?.[0] || "U") + (partes.length > 1 ? partes[partes.length - 1][0] : "");
+        document.querySelectorAll("[data-iv-initials]").forEach((item) => { item.textContent = iniciais.toLocaleUpperCase("pt-BR"); });
+      }
+
+      async function navegar1a(destino) {
+        if (!usuarioAtual || destino === "login" || !telas[destino]) return;
+        if (navegacaoEmAndamento1a) return;
+        if (registrandoLeitura || finalizandoContagem || leituraPendente || salvandoModal) {
+          exibirMensagem(el("mensagem-global"), "Conclua ou cancele a operação atual antes de trocar de tela.", "aviso");
+          return;
+        }
+        navegacaoEmAndamento1a = true;
+        document.querySelectorAll("[data-iv-route]").forEach((item) => { item.disabled = true; });
+        try {
+          // Não libera outra câmera enquanto uma inicialização está em curso.
+          if (abrindoCamera || parandoCamera) throw new Error("Aguarde a câmera terminar a operação atual.");
+          if (destino !== telaNavegacao1a && scanner) await pararCamera();
+          if (destino === "contagem") atualizarPainelContagem();
+          mostrarTela(destino);
+          if (destino === "cadastro") await carregarCategorias();
+          if (destino === "relatorios") await carregarHistoricoRelatorios();
+          if (telaNavegacao1a !== destino || !usuarioAtual) return;
+          if (destino === "contagem" && scanner?.isScanning) centralizarCameraNaTela();
+          else {
+            const reduzir = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+            window.scrollTo({ top: 0, behavior: reduzir ? "auto" : "smooth" });
+          }
+        } catch (erro) {
+          registrarErro(el("mensagem-global"), "Não foi possível concluir a navegação", erro);
+        } finally {
+          navegacaoEmAndamento1a = false;
+          document.querySelectorAll("[data-iv-route]").forEach((item) => { item.disabled = false; });
+          atualizarIndicadorContagem1a();
+        }
+      }
+
+      document.querySelectorAll("[data-iv-route]").forEach((botao) => {
+        botao.addEventListener("click", () => { void navegar1a(botao.dataset.ivRoute); });
+      });
+      const observadorNome1a = new MutationObserver(sincronizarConta1a);
+      observadorNome1a.observe(el("usuario-logado"), { childList: true, subtree: true, characterData: true });
+      atualizarNavegacao1a("login");
+
+      void inicializar();
+    })();
+  </script>
+</body>
+</html>

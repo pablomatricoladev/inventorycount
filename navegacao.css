@@ -1,0 +1,90 @@
+
+/* INVENTARIEI — navegação 1a. Carregar depois do CSS principal. */
+:root {
+  --iv-primary:var(--brand-primary,#1B4B8F);
+  --iv-accent:var(--brand-accent,#16A34A);
+  --iv-gray:var(--brand-gray,#6B7280);
+  --iv-border:#E2E8F1;
+  --iv-soft:#EDF3FC;
+  --iv-sidebar:264px;
+  --iv-bar-height:78px;
+}
+.iv-nav[hidden] { display:none !important; }
+.iv-nav,.iv-nav * { box-sizing:border-box; }
+.iv-nav { position:fixed; bottom:0; left:0; right:0; z-index:60; background:#fff; border-top:1px solid var(--iv-border); padding:0 max(8px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px,env(safe-area-inset-left)); }
+.iv-nav .iv-brand,.iv-nav .iv-nav-caption,.iv-nav .iv-account { display:none; }
+.iv-links { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:2px; max-width:820px; margin:0 auto; min-height:var(--iv-bar-height); align-items:stretch; }
+.iv-nav .iv-item { width:100%; min-width:0; min-height:var(--iv-bar-height); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; margin:0; padding:9px 2px 7px; border:0; border-radius:10px; color:var(--iv-gray); background:transparent; box-shadow:none; font-family:inherit; font-size:10px; line-height:1.4; font-weight:500; cursor:pointer; position:relative; transition:color .16s,background .16s; }
+.iv-item svg { display:block; width:22px; height:22px; flex-shrink:0; }
+.iv-nav .iv-icon { height:30px; min-width:44px; display:grid; place-items:center; border-radius:20px; }
+.iv-nav .iv-item:hover:not(:disabled) { background:#F5F8FD; color:var(--iv-primary); box-shadow:none; transform:none; }
+.iv-nav .iv-item:active:not(:disabled) { background:#EAF0FA; }
+.iv-nav .iv-item.is-active { color:var(--iv-primary); font-weight:600; }
+.iv-nav .iv-item.is-active .iv-icon { background:var(--iv-soft); }
+.iv-nav .iv-item:focus-visible { outline:3px solid #7B9DCB; outline-offset:-4px; }
+.iv-nav .iv-item:disabled { opacity:.45; cursor:wait; }
+.iv-nav .iv-item--count { color:#15803D; justify-content:flex-end; gap:3px; padding-top:31px; }
+.iv-nav .iv-item--count .iv-icon { position:absolute; top:-21px; left:50%; transform:translateX(-50%); width:58px; height:58px; border-radius:19px; background:var(--iv-accent); color:white; border:5px solid #F5F7FB; box-shadow:0 5px 15px #16A34A26; }
+.iv-nav .iv-item--count svg { height:25px; width:25px; }
+.iv-nav .iv-item--count.is-active .iv-icon { background:#15803D; }
+.iv-nav .iv-item--count:hover:not(:disabled) .iv-icon { background:#15803D; }
+.iv-dot { position:absolute; right:calc(50% - 19px); top:11px; width:7px; height:7px; border-radius:50%; background:var(--iv-accent); border:2px solid white; }
+.iv-item--count .iv-dot { right:7px; top:0; }
+.iv-dot[hidden] { display:none; }
+body[data-iv-auth="true"] .container { padding-bottom:calc(var(--iv-bar-height) + 50px + env(safe-area-inset-bottom)); }
+body[data-iv-auth="true"] .app-header { position:sticky; top:0; z-index:40; background:#F5F7FBF5; backdrop-filter:blur(12px); padding-top:12px; padding-bottom:12px; margin-top:-8px; margin-bottom:24px; border-bottom:1px solid var(--iv-border); }
+.iv-brand-image { display:block; width:46px; height:46px; object-fit:contain; border-radius:10px; flex-shrink:0; }
+.iv-brand-copy { min-width:0; }
+.iv-brand-title { display:block; color:var(--iv-primary); font-weight:700; font-size:19px; line-height:1.25; letter-spacing:-.02em; }
+.iv-brand-tagline { display:block; font-size:10px; color:var(--iv-gray); line-height:1.6; margin-top:4px; }
+.iv-profile-name { display:block; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; font-size:12px; font-weight:600; color:#172A46; }
+.iv-profile-description { display:block; color:var(--iv-gray); font-size:10px; margin-top:2px; }
+.iv-avatar { width:38px; height:38px; display:grid; place-items:center; border-radius:50%; background:var(--iv-primary); color:white; font-weight:600; font-size:12px; flex-shrink:0; }
+.iv-account-chevron { margin-left:auto; width:16px; height:16px; color:#8697AF; flex-shrink:0; }
+#tela-mais { max-width:760px; margin:0 auto; }
+.iv-more-heading { margin:0 0 24px; }
+.iv-profile-card { display:flex; align-items:center; gap:14px; }
+.iv-profile-card .iv-avatar { width:46px; height:46px; font-size:15px; }
+.iv-profile-card .user-caption { margin-bottom:3px; }
+.iv-profile-card #usuario-logado { font-size:15px; font-weight:600; }
+.iv-more-actions { display:grid; gap:10px; margin-top:20px; }
+.iv-more-actions .iv-more-link { display:flex; align-items:center; gap:12px; text-align:left; background:#fff; color:#172A46; border:1px solid var(--iv-border); padding:16px; margin:0; font-weight:500; box-shadow:none; }
+.iv-more-link svg { width:21px; height:21px; color:var(--iv-primary); flex-shrink:0; }
+.iv-more-link small { display:block; font-size:10px; color:var(--iv-gray); font-weight:400; margin-top:3px; }
+.iv-more-actions .iv-more-link:hover { background:#F5F8FD; border-color:#B8CBE5; box-shadow:none; }
+.iv-session-exit { padding-top:20px; border-top:1px solid var(--iv-border); margin-top:24px; }
+.iv-session-exit #botao-sair { color:#A73939; background:#FFF2F1; border-color:#F2DAD7; }
+.iv-session-exit #botao-sair:hover { background:#FCE5E3; }
+.iv-skip { position:fixed; z-index:100; top:8px; left:12px; padding:10px 15px; background:var(--iv-primary); color:white; border-radius:8px; transform:translateY(-180%); }
+.iv-skip:focus { transform:translateY(0); }
+#mensagem-global:focus { outline:none; }
+@media(min-width:1024px) {
+ body[data-iv-auth="true"] { padding-left:calc(var(--iv-sidebar) + 32px); padding-right:32px; }
+ body[data-iv-auth="true"] .container { padding-top:36px; padding-bottom:20px; max-width:1180px; }
+ body[data-iv-auth="true"] .app-header { display:none; }
+ .iv-nav { top:0; bottom:0; right:auto; width:var(--iv-sidebar); border-top:0; border-right:1px solid var(--iv-border); padding:24px 14px 18px; display:flex; flex-direction:column; }
+ .iv-nav .iv-brand { display:flex; align-items:center; gap:9px; padding:0 6px 26px; }
+ .iv-nav .iv-nav-caption { display:block; color:#8A98AC; font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; padding:6px 14px 12px; }
+ .iv-links { display:flex; flex-direction:column; gap:5px; width:100%; margin:0; max-width:none; min-height:0; overflow-y:auto; overflow-x:hidden; padding:0 0 12px; }
+ .iv-nav .iv-item { display:flex; flex-direction:row; justify-content:flex-start; align-items:center; min-height:48px; gap:12px; padding:0 14px; font-size:12px; border-radius:10px; text-align:left; }
+ .iv-nav .iv-item .iv-icon { width:22px; min-width:22px; height:22px; background:transparent; border-radius:0; }
+ .iv-nav .iv-item.is-active { background:var(--iv-soft); }
+ .iv-nav .iv-item.is-active .iv-icon { background:transparent; }
+ .iv-nav .iv-item--count { color:var(--iv-primary); padding-top:0; }
+ .iv-nav .iv-item--count .iv-icon { position:static; left:auto; top:auto; transform:none; width:22px; height:22px; min-width:22px; border:0; box-shadow:none; background:transparent; color:inherit; }
+ .iv-nav .iv-item--count svg { height:22px; width:22px; }
+ .iv-nav .iv-item--count.is-active { color:#15803D; background:#F0FDF4; }
+ .iv-nav .iv-item--count.is-active .iv-icon,.iv-nav .iv-item--count:hover:not(:disabled) .iv-icon { background:transparent; }
+ .iv-item--count .iv-dot,.iv-dot { position:static; margin-left:auto; width:8px; height:8px; }
+ .iv-nav .iv-account { display:flex; align-items:center; gap:10px; width:100%; min-height:70px; text-align:left; padding:12px; border:1px solid var(--iv-border); margin:auto 0 0; border-radius:13px; background:#F8FAFD; cursor:pointer; box-shadow:none; }
+ .iv-nav .iv-account:hover { background:var(--iv-soft); box-shadow:none; }
+ .iv-nav .iv-account:focus-visible { outline:3px solid #7B9DCB; outline-offset:2px; }
+ .iv-account-copy { min-width:0; }
+ .iv-nav .iv-brand-tagline { max-width:160px; font-size:9px; }
+}
+@media(max-width:360px) {
+ .iv-nav .iv-item { font-size:9px; }
+ .iv-nav .iv-item--count .iv-icon { width:54px; height:54px; top:-18px; }
+ .iv-profile-card #usuario-logado { font-size:13px; }
+}
+@media(prefers-reduced-motion:reduce) { .iv-nav * { transition:none !important; } }
